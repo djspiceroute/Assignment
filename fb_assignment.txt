@@ -1,0 +1,52 @@
+FB Hive Assignemnet
+
+CREATE TABLE fb (userid int ,age int,dob_day int, dob_year int,dob_month int, gender string, tenure int,friend_count int , friendships_initiated int , likes int , likes_received int , mobile_likes int , mobile_likes_received int , www_likes int , www_likes_received int) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' TBLPROPERTIES ("skip.header.line.count"="1");
+
+LOAD DATA local INPATH 'pseudo_facebook.csv' OVERWRITE INTO TABLE fb;
+
+1.	Find out the total no of users in the dataset
+select count(*) from fb; 99003
+
+2. Find out the no of users above the age of 25
+select count(*) from fb where age>25; 56676
+
+3.  Do male face book users tend to have more friends or female users
+select count(*) from fb where gender='male' and friend_count>0; 57115
+select count(*) from fb where gender='female' and friend_count>0; 39751
+
+4. How many likes do young people receive on facebook as opposed to old people
+young people - minors age<19
+old people - adults age>18
+
+select sum(likes_received) from fb where age<19; 3910993
+select sum(likes_received) from fb where age>18; 10215682
+
+5.  Find out the count of facebook users for each birthday month
+
+select dob_month, count(*) from fb group by dob_month;
+
+                                                                                                                              
+1       11772                                                                                                                          
+2       7632                                                                                                                           
+3       8110                                                                                                                           
+4       7810                                                                                                                           
+5       8271                                                                                                                           
+6       7607                                                                                                                           
+7       8021                                                                                                                           
+8       8266                                                                                                                           
+9       7939                                                                                                                           
+10      8476                                                                                                                           
+11      7205                                                                                                                           
+12      7894
+
+6. Do young members use mobile phones or computers for facebook browsing -MOBILE
+
+with q1 as (select sum(mobile_likes + mobile_likes_received) from fb where age<19) , q2 as (select sum(www_likes + www_likes_received) from fb where age<19) select * from q1,q2; 
+
+4704827 2800190
+
+Q7: Do adult members use mobile phones or computers for facebook browsing  - MOBILE
+
+with q1 as (select sum(mobile_likes + mobile_likes_received) from fb where age>18) , q2 as (select sum(www_likes + www_likes_received) from fb where age>18) select * from q1,q2;
+14129186        7944730
+
