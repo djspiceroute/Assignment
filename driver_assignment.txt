@@ -1,0 +1,107 @@
+Create external tables for drivers and timesheet data and answer the following queries
+
+CREATE EXTERNAL TABLE drivers (driverId int,name string,ssn string,location string,certified string,wageplan string) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LOCATION '/user/mavricbdhoct01231/drivers' TBLPROPERTIES ("skip.header.line.count"="1")
+
+LOAD DATA INPATH '/user/mavricbdhoct01231/data/drivers.csv' INTO TABLE drivers;
+
+CREATE EXTERNAL TABLE timesheet ( driverId int,week int,hourslogged int,mileslogged int) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LOCATION '/user/mavricbdhoct01231/timesheet' TBLPROPERTIES ("skip.header.line.count"="1")
+
+LOAD DATA INPATH '/user/mavricbdhoct01231/data/timesheet.csv' INTO TABLE timesheet;
+
+Query:
+How many total hours and miles logged by each driver?
+
+select driverId, sum(hourslogged) as TotalHours , sum(mileslogged) as TotalMiles from timesheet group by driverId;
+
++-----------+-------------+-------------+                                                                                              
+| driverid  | totalhours  | totalmiles  |                                                                                              
++-----------+-------------+-------------+                                                                                              
+| 10        | 3232        | 147150      |                                                                                              
+| 11        | 3642        | 179300      |                                                                                              
+| 12        | 2639        | 135962      |                                                                                              
+| 13        | 2727        | 134126      |                                                                                              
+| 14        | 2781        | 136624      |                                                                                              
+| 15        | 2734        | 138750      |                                                                                              
+| 16        | 2746        | 137205      |                                                                                              
+| 17        | 2701        | 135992      |                                                                                              
+| 18        | 2654        | 137834      |                                                                                              
+| 19        | 2738        | 137968      |                                                                                              
+| 20        | 2644        | 134564      |                                                                                              
+| 21        | 2751        | 138719      |                                                                                              
+| 22        | 2733        | 137550      |                                                                                              
+| 23        | 2750        | 137980      |                                                                                              
+| 24        | 2647        | 134461      |                                                                                              
+| 25        | 2723        | 139180      |                                                                                              
+| 26        | 2730        | 137530      |                                                                                              
+| 27        | 2771        | 137922      |                                                                                              
+| 28        | 2723        | 137469      |                                                                                              
+| 29        | 2760        | 138255      |                                                                                              
+| 30        | 2773        | 137473      |                                                                                              
+| 31        | 2704        | 137057      |                                                                                              
+| 32        | 2736        | 137422      |                                                                                              
+| 33        | 2759        | 139285      |                                                                                              
+| 34        | 2811        | 137728      |                                                                                              
+| 35        | 2728        | 138727      |                                                                                              
+| 36        | 2795        | 138025      |                                                                                              
+| 37        | 2694        | 137223      |                                                                                              
+| 38        | 2760        | 137464      |                                                                                              
+| 39        | 2745        | 138788      |                                                                                              
+| 40        | 2700        | 136931      |                                                                                              
+| 41        | 2723        | 138407      |                                                                                              
+| 42        | 2697        | 136673      |                                                                                              
+| 43        | 2750        | 136993      |                                                                                              
++-----------+-------------+-------------+ 
+
+Query: 
+Print the name of the driver in the above query
+
+select t.driverId ,d.name as DriverName, sum(t.hourslogged) as TotalHours , sum(t.mileslogged) as TotalMiles from timesheet t left join drivers d on t.driverId=d.driverId group by t.driverId ,d.name;
+
++-------------+----------------------+-------------+-------------+                                                                     
+| t.driverid  |      drivername      | totalhours  | totalmiles  |                                                                     
++-------------+----------------------+-------------+-------------+                                                                     
+| 10          | George Vetticaden    | 3232        | 147150      |                                                                     
+| 11          | Jamie Engesser       | 3642        | 179300      |                                                                     
+| 12          | Paul Coddin          | 2639        | 135962      |                                                                     
+| 13          | Joe Niemiec          | 2727        | 134126      |                                                                     
+| 14          | Adis Cesir           | 2781        | 136624      |                                                                     
+| 15          | Rohit Bakshi         | 2734        | 138750      |                                                                     
+| 16          | Tom McCuch           | 2746        | 137205      |                                                                     
+| 17          | Eric Mizell          | 2701        | 135992      |                                                                     
+| 18          | Grant Liu            | 2654        | 137834      |                                                                     
+| 19          | Ajay Singh           | 2738        | 137968      |                                                                     
+| 20          | Chris Harris         | 2644        | 134564      |                                                                     
+| 21          | Jeff Markham         | 2751        | 138719      |                                                                     
+| 22          | Nadeem Asghar        | 2733        | 137550      |                                                                     
+| 23          | Adam Diaz            | 2750        | 137980      |                                                                     
+| 24          | Don Hilborn          | 2647        | 134461      |                                                                     
+| 25          | Jean-Philippe Playe  | 2723        | 139180      |                                                                     
+| 26          | Michael Aube         | 2730        | 137530      |                                                                     
+| 27          | Mark Lochbihler      | 2771        | 137922      |                                                                     
+| 28          | Olivier Renault      | 2723        | 137469      |                                                                     
+| 29          | Teddy Choi           | 2760        | 138255      |                                                                     
+| 30          | Dan Rice             | 2773        | 137473      |                                                                     
+| 31          | Rommel Garcia        | 2704        | 137057      |                                                                     
+| 32          | Ryan Templeton       | 2736        | 137422      |                                                                     
+| 33          | Sridhara Sabbella    | 2759        | 139285      |                                                                     
+| 34          | Frank Romano         | 2811        | 137728      |                                                                     
+| 35          | Emil Siemes          | 2728        | 138727      |                                                                     
+| 36          | Andrew Grande        | 2795        | 138025      |                                                                     
+| 37          | Wes Floyd            | 2694        | 137223      |                                                                     
+| 38          | Scott Shaw           | 2760        | 137464      |                                                                     
+| 39          | David Kaiser         | 2745        | 138788      |                                                                     
+| 40          | Nicolas Maillard     | 2700        | 136931      |                                                                     
+| 41          | Greg Phillips        | 2723        | 138407      |                                                                     
+| 42          | Randy Gelhausen      | 2697        | 136673      |                                                                     
+| 43          | Dave Patton          | 2750        | 136993      |                                                                     
++-------------+----------------------+-------------+-------------+ 
+
+
+Query: 
+Write the above query output in to hdfs directory
+
+create table driver_a as select t.driverId ,d.name as DriverName, sum(t.hourslogged) as TotalHours , sum(t.mileslogged) as TotalMiles from timesheet t left join drivers d on t.driverId=d.driverId group by t.driverId ,d.name;
+
+[mavricbdhoct01231@ip-10-1-1-204 driver]$ hdfs dfs -ls /user/hive/warehouse/dj*/driver_a                                               
+Found 1 items                                                                                                                          
+-rwxrwxrwx   3 mavricbdhoct01231 hive        961 2023-10-30 13:38 /user/hive/warehouse/djhive.db/driver_a/000000_0
