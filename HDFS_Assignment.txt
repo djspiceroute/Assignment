@@ -1,0 +1,100 @@
+1. 	hdfs dfs -mkdir data
+	hdfs dfs -mkdir data/prod
+	hdfs dfs -mkdir data/dev
+	hdfs dfs -mkdir data/dev/analysis
+	hdfs dfs -mkdir data/prod/analysis
+	hdfs dfs -put Covid-19 /user/mavricbdhoct01231/data/dev/analysis
+
+2.	hdfs dfs -chmod 776 data/dev/analysis/Covid-19/Covid_patient_Apr26.csv                            
+ 
+3.	hdfs dfs -cp data/dev/analysis/Covid-19 data/prod/analysis
+
+4.	hdfs dfs -cat data/prod/analysis/Covid-19/Covid_patient_Apr19.csv  
+
+5.	[mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -cat data/prod/analysis/Covid-19/Covid_patient_Apr19.csv |wc -l                          
+	17365                              
+
+6.	hdfs dfs -cat data/prod/analysis/Covid-19/Covid_patient_Apr19.csv |grep ',UP,' | wc -l 
+	1112  
+
+7.	hdfs dfs -rm data/prod/analysis/Covid-19/Covid_patient_Apr19.csv                                  
+23/10/26 08:23:41 INFO fs.TrashPolicyDefault: Moved: 'hdfs://nameservice1/user/mavricbdhoct01231/data/prod/analysis/Covid-19/Covid_pati
+ent_Apr19.csv' to trash at: hdfs://nameservice1/user/mavricbdhoct01231/.Trash/Current/user/mavricbdhoct01231/data/prod/analysis/Covid-1
+9/Covid_patient_Apr19.csv             
+
+8.	hdfs dfs -rm -r data/prod/analysis/Covid-19
+	hdfs dfs -rm -r data/dev/analysis/Covid-19
+	
+9.	hdfs dfs -put TicketsDB_DJ /user/mavricbdhoct01231/
+
+10. hdfs dfs -ls TicketsDB_DJ |grep 'pipe' |wc -l
+	6
+	
+11.	hdfs dfs -put h1b.csv /user/mavricbdhoct01231/
+[mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -ls                                                                                      
+Found 6 items                                                                                                                          
+drwx------   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-30 07:00 .Trash                                                  
+drwx------   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-27 12:37 .staging                                                
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-30 06:58 TicketsDB_DJ                                            
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-26 07:37 data                                                    
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231  492258249 2023-10-30 07:07 h1b.csv                                                 
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-25 11:50 userratings 
+
+
+12. [mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -mv h1b.csv /user/mavricbdhoct01231/TicketsDB_DJ                                         
+[mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -ls                                                                                      
+Found 5 items                                                                                                                          
+drwx------   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-30 07:00 .Trash                                                  
+drwx------   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-27 12:37 .staging                                                
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-30 07:09 TicketsDB_DJ                                            
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-26 07:37 data                                                    
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-25 11:50 userratings                                             
+[mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -ls /user/mavricbdhoct01231/TicketsDB_DJ                                                 
+Found 8 items                                                                                                                          
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231     445838 2023-10-30 06:58 /user/mavricbdhoct01231/TicketsDB_DJ/allevents_pipe.txt 
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231    5893626 2023-10-30 06:58 /user/mavricbdhoct01231/TicketsDB_DJ/allusers_pipe.txt  
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231        465 2023-10-30 06:58 /user/mavricbdhoct01231/TicketsDB_DJ/category_pipe.txt  
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231      14534 2023-10-30 06:58 /user/mavricbdhoct01231/TicketsDB_DJ/date2008_pipe.txt  
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231  492258249 2023-10-30 07:07 /user/mavricbdhoct01231/TicketsDB_DJ/h1b.csv            
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231   11585036 2023-10-30 06:58 /user/mavricbdhoct01231/TicketsDB_DJ/listings_pipe.txt  
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231   11260097 2023-10-30 06:58 /user/mavricbdhoct01231/TicketsDB_DJ/sales_tab.txt      
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231       7988 2023-10-30 06:58 /user/mavricbdhoct01231/TicketsDB_DJ/venue_pipe.txt 
+
+13. [mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -du                                                                                      
+13316128   39948384    .Trash                                                                                                          
+0          0           .staging                                                                                                        
+521465833  1564397499  TicketsDB_DJ                                                                                                    
+0          0           data                                                                                                            
+21593504   64780512    userratings      
+
+14.	hdfs dfs -count -h -v /user/mavricbdhoct01231/
+   DIR_COUNT   FILE_COUNT       CONTENT_SIZE PATHNAME                                                                                  
+          20           14            530.6 M /user/mavricbdhoct01231 
+		  
+16. hdfs dfs -createSnapshot /user/mavricbdhoct01231
+
+hdfs dfsadmin -allowSnapshot /user/mavricbdhoct01231 
+
+h15. dfs dfs -deleteSnapshot /user/mavricbdhoct01231
+
+17. [mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -setrep 3 /user/mavricbdhoct01231                                                        
+Replication 3 set: /user/mavricbdhoct01231/.Trash/231030070000/user/mavricbdhoct01231/data/dev/analysis/Covid-19/Covid_patient_Apr19.cs
+v                                                                                                                                      
+Replication 3 set: /user/mavricbdhoct01231/.Trash/231030070000/user/mavricbdhoct01231/data/dev/analysis/Covid-19/Covid_patient_Apr26.cs
+v                                                                                                                                      
+Replication 3 set: /user/mavricbdhoct01231/.Trash/231030070000/user/mavricbdhoct01231/data/dev/analysis/Covid-19/covid-countries-aggreg
+ated.csv                                                                                                                               
+Replication 3 set: /user/mavricbdhoct01231/.Trash/231030070000/user/mavricbdhoct01231/data/prod/analysis/Covid-19/Covid_patient_Apr26.c
+sv                                                                                                                                     
+Replication 3 set: /user/mavricbdhoct01231/.Trash/231030070000/user/mavricbdhoct01231/data/prod/analysis/Covid-19/covid-countries-aggre
+gated.csv                                                                                                                              
+Replication 3 set: /user/mavricbdhoct01231/TicketsDB_DJ/allevents_pipe.txt                                                             
+Replication 3 set: /user/mavricbdhoct01231/TicketsDB_DJ/allusers_pipe.txt                                                              
+Replication 3 set: /user/mavricbdhoct01231/TicketsDB_DJ/category_pipe.txt                                                              
+Replication 3 set: /user/mavricbdhoct01231/TicketsDB_DJ/date2008_pipe.txt                                                              
+Replication 3 set: /user/mavricbdhoct01231/TicketsDB_DJ/h1b.csv                                                                        
+Replication 3 set: /user/mavricbdhoct01231/TicketsDB_DJ/listings_pipe.txt                                                              
+Replication 3 set: /user/mavricbdhoct01231/TicketsDB_DJ/sales_tab.txt                                                                  
+Replication 3 set: /user/mavricbdhoct01231/TicketsDB_DJ/venue_pipe.txt                                                                 
+Replication 3 set: /user/mavricbdhoct01231/userratings/ratings.dat 
+
