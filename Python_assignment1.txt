@@ -1,13 +1,7 @@
-# initialize the net amount to zero
 net_amount = 0
-
-# get the log message from console input
 log_message = input("Enter the transaction log: ")
-
-# split the log message by space
 transactions = log_message.split()
 
-# loop through each transaction
 for transaction in transactions:
     # split the transaction by colon
     operation, amount = transaction.split(":")
@@ -24,5 +18,5 @@ for transaction in transactions:
         # invalid operation
         print("Invalid operation:", operation)
 
-# print the net amount
+
 print("The net amount is:", net_amount)
