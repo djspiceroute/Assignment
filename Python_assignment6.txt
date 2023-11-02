@@ -1,0 +1,8 @@
+# define a lambda function that adds 25 to a given number
+add_25 = lambda x: x + 25
+
+# sample input
+sample_input = 10
+
+# call the lambda function and print the result
+print("The result is:", add_25(sample_input))

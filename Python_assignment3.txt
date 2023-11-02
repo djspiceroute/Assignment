@@ -1,0 +1,16 @@
+# define a function to sum all the numbers in a list
+def sum_list(numbers):
+    # initialize the sum to zero
+    sum = 0
+    # loop through each number in the list
+    for number in numbers:
+        # add the number to the sum
+        sum += number
+    # return the sum
+    return sum
+
+# sample list
+sample_list = [8, 2, 3, 0, 7]
+
+# call the function and print the result
+print("The sum of the numbers in the list is:", sum_list(sample_list))

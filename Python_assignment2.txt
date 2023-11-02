@@ -1,0 +1,22 @@
+# get the number of calls from user input
+calls = int(input("Enter the number of calls: "))
+
+# initialize the monthly bill to zero
+bill = 0
+
+# check the number of calls and apply the rule accordingly
+if calls <= 100:
+    # minimum Rs. 200 for up to 100 calls
+    bill = 200
+elif calls <= 150:
+    # plus Rs. 0.60 per call for next 50 calls
+    bill = 200 + (calls - 100) * 0.60
+elif calls <= 200:
+    # plus Rs. 0.50 per call for next 50 calls
+    bill = 200 + 50 * 0.60 + (calls - 150) * 0.50
+else:
+    # plus Rs. 0.40 per call for any call beyond 200 calls
+    bill = 200 + 50 * 0.60 + 50 * 0.50 + (calls - 200) * 0.40
+
+# print the monthly bill
+print("The monthly telephone bill is: Rs.", bill)

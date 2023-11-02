@@ -1,0 +1,14 @@
+# define a function to get the last element of a tuple
+def last_element(t):
+    return t[-1]
+
+# define a function to sort a list of tuples by the last element
+def sort_by_last_element(tuples):
+    # use the sorted function with the key argument as the last_element function
+    return sorted(tuples, key=last_element)
+
+# sample list
+sample_list = [(2, 5), (1, 2), (4, 4), (2, 3), (2, 1)]
+
+# call the function and print the result
+print("The sorted list is:", sort_by_last_element(sample_list))

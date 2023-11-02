@@ -1,0 +1,12 @@
+# define an empty dictionary
+dictionary = {}
+
+# loop through the ASCII values from 97 to 122
+for i in range(97, 123):
+    # convert the ASCII value to a character
+    char = chr(i)
+    # assign the character as the key and the ASCII value as the value in the dictionary
+    dictionary[char] = i
+
+# print the dictionary
+print(dictionary)
