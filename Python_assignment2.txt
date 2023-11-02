@@ -1,10 +1,7 @@
-# get the number of calls from user input
-calls = int(input("Enter the number of calls: "))
 
-# initialize the monthly bill to zero
+calls = int(input("Enter the number of calls: "))
 bill = 0
 
-# check the number of calls and apply the rule accordingly
 if calls <= 100:
     # minimum Rs. 200 for up to 100 calls
     bill = 200
