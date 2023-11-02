@@ -1,0 +1,28 @@
+
+
+CREATE TABLE album (singer string , song string,duration decimal(4,2),musicdirector string);
+
++----------------+---------------+----------+                                                                                          
+|    col_name    |   data_type   | comment  |                                                                                          
++----------------+---------------+----------+                                                                                          
+| singer         | string        |          |                                                                                          
+| song           | string        |          |                                                                                          
+| duration       | decimal(4,2)  |          |                                                                                          
+| musicdirector  | string        |          |                                                                                          
++----------------+---------------+----------+ 
+
+iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer1','Song1',4.35,'AK')  ;
+iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer1','Song2', 3.54 ,'JK');
+iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer1','Song3', 2.03 ,'JK');
+iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer2','Song4', 1.54 ,'AK');
+iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer2','Song5', 3.43 ,'FG');
+iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer3','Song6', 2.03 ,'JK');
+iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer3','Song1', 1.54 ,'AK');
+iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer4','Song2', 3.43 ,'FG');
+
+CREATE TABLE albumtohbase(singer string , song string,duration decimal(4,2),musicdirector string)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,info:song,info:duration,info:md')
+TBLPROPERTIES ('hbase.table.name' = 'djns:album') ;
+
+insert overwrite table albumtohbase select * from album;

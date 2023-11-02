@@ -1,0 +1,69 @@
+ !connect jdbc:hive2://10.1.1.204:10000/djhive mavricbdhoct01231 Clouddata1
+ 
+CREATE EXTERNAL TABLE StockToHBase(rowkey String, info_userid STRING, user_display_name STRING,active string,comment string)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,info:userid,info:user_display_name,info:active,info:comment')
+TBLPROPERTIES ('hbase.table.name' = 'djns:stockcmntsymbl') ;
+
++----------------------+---------------------------+---------------------------------+----------------------+--------------------------
+--------------------------+                                                                                                            
+| stocktohbase.rowkey  | stocktohbase.info_userid  | stocktohbase.user_display_name  | stocktohbase.active  |                stocktohba
+se.comment                |                                                                                                            
++----------------------+---------------------------+---------------------------------+----------------------+--------------------------
+--------------------------+                                                                                                            
+| APL:comment1         | user3                     | Federer                         | True                 | This stock will eventuall
+y make money.             |                                                                                                            
+| APL:comment2         | user3                     | Federer                         | False                | Could be a big winner    
+                          |                                                                                                            
+| BHD:comment1         | user2                     | The Ex-Governator               | True                 | This stock is undervalued
+                          |                                                                                                            
+| BHD:comment2         | user2                     | The Ex-Governator               | False                | This stock is going nowhe
+re.                       |                                                                                                            
+| EPAM:comment1        | user1                     | GreatUser                       | True                 | This is a great stock    
+                          |                                                                                                            
+| EPAM:comment2        | user1                     | GreatUser                       | True                 | This is increasing       
+                          |                                                                                                            
+| EXC:comment1         | user4                     | King James                      | True                 | I have this one on my rad
+ar.                       |                                                                                                            
+| EXC:comment2         | user4                     | King James                      | True                 | Interesting value proposi
+tion but too early to know if they will survive. |                                                                                     
+| INFI:comment1        | user6                     | Time World Series Winner        | False                | Buy it now before the rus
+h.                        |                                                                                                            
+| INFI:comment2        | user6                     | Time World Series Winner        | True                 | Dump this one fast!      
+                          |                                                                                                            
++----------------------+---------------------------+---------------------------------+----------------------+--------------------------
+
+select distinct info_userid,comment from stocktohbase;
+
++--------------+----------------------------------------------------+                                                                  
+| info_userid  |                      comment                       |                                                                  
++--------------+----------------------------------------------------+                                                                  
+| user1        | This is a great stock                              |                                                                  
+| user1        | This is increasing                                 |                                                                  
+| user2        | This stock is going nowhere.                       |                                                                  
+| user2        | This stock is undervalued                          |                                                                  
+| user3        | Could be a big winner                              |                                                                  
+| user3        | This stock will eventually make money.             |                                                                  
+| user4        | I have this one on my radar.                       |                                                                  
+| user4        | Interesting value proposition but too early to know if they will survive. |                                           
+| user6        | Buy it now before the rush.                        |                                                                  
+| user6        | Dump this one fast!          
+
+select info_userid,comment from stocktohbase where info_userid='user3';
+
++--------------+-----------------------------------------+                                                                             
+| info_userid  |                 comment                 |                                                                             
++--------------+-----------------------------------------+                                                                             
+| user3        | Could be a big winner                   |                                                                             
+| user3        | This stock will eventually make money.  |                                                                             
++--------------+-----------------------------------------+ 
+
+select info_userid from stocktohbase where active='False';
+
++--------------+                                                                                                                       
+| info_userid  |                                                                                                                       
++--------------+                                                                                                                       
+| user3        |                                                                                                                       
+| user2        |                                                                                                                       
+| user6        |                                                                                                                       
++--------------+ 

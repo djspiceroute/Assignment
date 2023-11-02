@@ -1,0 +1,125 @@
+
+create  'djns:stockcmntsymbl','info'
+
+put "djns:stockcmntsymbl","EXC:comment1","info:userid","user4"
+put "djns:stockcmntsymbl","EXC:comment1","info:user_display_name","King James"
+put "djns:stockcmntsymbl","EXC:comment1","info:active","True"
+put "djns:stockcmntsymbl","EXC:comment1","info:comment","I have this one on my radar."
+put "djns:stockcmntsymbl","EXC:comment2","info:userid","user4"
+put "djns:stockcmntsymbl","EXC:comment2","info:user_display_name","King James"
+put "djns:stockcmntsymbl","EXC:comment2","info:active","True"
+put "djns:stockcmntsymbl","EXC:comment2","info:comment","Interesting value proposition but too early to know if they will survive."
+put "djns:stockcmntsymbl","INFI:comment1","info:userid","user5"
+put "djns:stockcmntsymbl","INFI:comment1","info:user_display_name","Wizard of Wall Street"
+put "djns:stockcmntsymbl","INFI:comment1","info:active","True"
+put "djns:stockcmntsymbl","INFI:comment1","info:comment","I like this one but would suggest waiting a few months."
+put "djns:stockcmntsymbl","INFI:comment2","info:userid","user5"
+put "djns:stockcmntsymbl","INFI:comment2","info:user_display_name","Wizard of Wall Street"
+put "djns:stockcmntsymbl","INFI:comment2","info:active","False"
+put "djns:stockcmntsymbl","INFI:comment2","info:comment","Not obvious yet but this stock is gonna be a huge winner."
+put "djns:stockcmntsymbl","INFI:comment1","info:userid","user6"
+put "djns:stockcmntsymbl","INFI:comment1","info:user_display_name","Time World Series Winner"
+put "djns:stockcmntsymbl","INFI:comment1","info:active","False"
+put "djns:stockcmntsymbl","INFI:comment1","info:comment","Buy it now before the rush."
+put "djns:stockcmntsymbl","INFI:comment2","info:userid","user6"
+put "djns:stockcmntsymbl","INFI:comment2","info:user_display_name","Time World Series Winner"
+put "djns:stockcmntsymbl","INFI:comment2","info:active","True"
+put "djns:stockcmntsymbl","INFI:comment2","info:comment","Dump this one fast!"
+
+What are the various comments given by all the users?
+hbase(main):053:0> scan 'djns:stockcmntsymbl', {COLUMN=>['info:comment']}                                                              
+ROW                                COLUMN+CELL                                                                                         
+ APL:comment1                      column=info:comment, timestamp=1698406698030, value=This stock will eventually make money.          
+ APL:comment2                      column=info:comment, timestamp=1698406699564, value=Could be a big winner                           
+ BHD:comment1                      column=info:comment, timestamp=1698406697545, value=This stock is undervalued                       
+ BHD:comment2                      column=info:comment, timestamp=1698406697784, value=This stock is going nowhere.                    
+ EPAM:comment1                     column=info:comment, timestamp=1698406697313, value=This is a great stock                           
+ EPAM:comment2                     column=info:comment, timestamp=1698407030418, value=This is increasing                              
+ EXC:comment1                      column=info:comment, timestamp=1698919639159, value=I have this one on my radar.                    
+ EXC:comment2                      column=info:comment, timestamp=1698919639349, value=Interesting value proposition but too early to k
+                                   now if they will survive.                                                                           
+ INFI:comment1                     column=info:comment, timestamp=1698919639779, value=Buy it now before the rush.                     
+ INFI:comment2                     column=info:comment, timestamp=1698919642104, value=Dump this one fast!
+ 
+What are the comments by user3?
+scan 'djns:stockcmntsymbl', {FILTER => SingleColumnValueFilter.new(Bytes.toBytes('info'), Bytes.toBytes('userid'), CompareFilter::CompareOp.valueOf('EQUAL'),BinaryComparator.new(Bytes.toBytes('user6')))}
+Which users have inactive comments?
+scan 'djns:stockcmntsymbl', {FILTER => SingleColumnValueFilter.new(Bytes.toBytes('info'), Bytes.toBytes('active'), CompareFilter::CompareOp.valueOf('EQUAL'),BinaryComparator.new(Bytes.toBytes('False')))}
+
+hbase(main):065:0> scan 'djns:stockcmntsymbl', {FILTER => SingleColumnValueFilter.new(Bytes.toBytes('info'), Bytes.toBytes('active'), C
+ompareFilter::CompareOp.valueOf('EQUAL'),BinaryComparator.new(Bytes.toBytes('False')))}
+ROW                                COLUMN+CELL                                                                                         
+ APL:comment2                      column=info:active, timestamp=1698406698201, value=False                                            
+ APL:comment2                      column=info:comment, timestamp=1698406699564, value=Could be a big winner                           
+ APL:comment2                      column=info:user_display_name, timestamp=1698406698150, value=Federer                               
+ APL:comment2                      column=info:userid, timestamp=1698406698091, value=user3                                            
+ BHD:comment2                      column=info:active, timestamp=1698406697720, value=False                                            
+ BHD:comment2                      column=info:comment, timestamp=1698406697784, value=This stock is going nowhere.                    
+ BHD:comment2                      column=info:user_display_name, timestamp=1698406697662, value=The Ex-Governator                     
+ BHD:comment2                      column=info:userid, timestamp=1698406697596, value=user2                                            
+ INFI:comment1                     column=info:active, timestamp=1698919639745, value=False                                            
+ INFI:comment1                     column=info:comment, timestamp=1698919639779, value=Buy it now before the rush.                     
+ INFI:comment1                     column=info:user_display_name, timestamp=1698919639713, value=Time World Series Winner              
+ INFI:comment1                     column=info:userid, timestamp=1698919639680, value=user6
+ 
+ !connect jdbc:hive2://10.1.1.204:10000/djhive mavricbdhoct01231 Clouddata1
+ 
+CREATE EXTERNAL TABLE StockToHBase(rowkey String, info_userid STRING, user_display_name STRING,active string,comment string)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,info:userid,info:user_display_name,info:active,info:comment')
+TBLPROPERTIES ('hbase.table.name' = 'djns:stockcmntsymbl') ;
+
++----------------------+---------------------------+---------------------------------+----------------------+--------------------------
+--------------------------+                                                                                                            
+| stocktohbase.rowkey  | stocktohbase.info_userid  | stocktohbase.user_display_name  | stocktohbase.active  |                stocktohba
+se.comment                |                                                                                                            
++----------------------+---------------------------+---------------------------------+----------------------+--------------------------
+--------------------------+                                                                                                            
+| APL:comment1         | user3                     | Federer                         | True                 | This stock will eventuall
+y make money.             |                                                                                                            
+| APL:comment2         | user3                     | Federer                         | False                | Could be a big winner    
+                          |                                                                                                            
+| BHD:comment1         | user2                     | The Ex-Governator               | True                 | This stock is undervalued
+                          |                                                                                                            
+| BHD:comment2         | user2                     | The Ex-Governator               | False                | This stock is going nowhe
+re.                       |                                                                                                            
+| EPAM:comment1        | user1                     | GreatUser                       | True                 | This is a great stock    
+                          |                                                                                                            
+| EPAM:comment2        | user1                     | GreatUser                       | True                 | This is increasing       
+                          |                                                                                                            
+| EXC:comment1         | user4                     | King James                      | True                 | I have this one on my rad
+ar.                       |                                                                                                            
+| EXC:comment2         | user4                     | King James                      | True                 | Interesting value proposi
+tion but too early to know if they will survive. |                                                                                     
+| INFI:comment1        | user6                     | Time World Series Winner        | False                | Buy it now before the rus
+h.                        |                                                                                                            
+| INFI:comment2        | user6                     | Time World Series Winner        | True                 | Dump this one fast!      
+                          |                                                                                                            
++----------------------+---------------------------+---------------------------------+----------------------+--------------------------
+
+select distinct info_userid,comment from stocktohbase;
+
++--------------+----------------------------------------------------+                                                                  
+| info_userid  |                      comment                       |                                                                  
++--------------+----------------------------------------------------+                                                                  
+| user1        | This is a great stock                              |                                                                  
+| user1        | This is increasing                                 |                                                                  
+| user2        | This stock is going nowhere.                       |                                                                  
+| user2        | This stock is undervalued                          |                                                                  
+| user3        | Could be a big winner                              |                                                                  
+| user3        | This stock will eventually make money.             |                                                                  
+| user4        | I have this one on my radar.                       |                                                                  
+| user4        | Interesting value proposition but too early to know if they will survive. |                                           
+| user6        | Buy it now before the rush.                        |                                                                  
+| user6        | Dump this one fast!          
+
+select info_userid,comment from stocktohbase where info_userid='user3';
+
++--------------+-----------------------------------------+                                                                             
+| info_userid  |                 comment                 |                                                                             
++--------------+-----------------------------------------+                                                                             
+| user3        | Could be a big winner                   |                                                                             
+| user3        | This stock will eventually make money.  |                                                                             
++--------------+-----------------------------------------+ 
+
+select info_userid from stocktohbase where active='False';
