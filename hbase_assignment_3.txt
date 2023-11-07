@@ -1,28 +1,109 @@
+import org.apache.hadoop.hbase.filter.SingleColumnValueFilter
+import org.apache.hadoop.hbase.filter.CompareFilter
+import org.apache.hadoop.hbase.filter.BinaryComparator
 
-
-CREATE TABLE album (singer string , song string,duration decimal(4,2),musicdirector string);
+CREATE TABLE albumdj (rowkey string, singer string , song string,duration decimal(4,2),musicdirector string);
 
 +----------------+---------------+----------+                                                                                          
 |    col_name    |   data_type   | comment  |                                                                                          
 +----------------+---------------+----------+                                                                                          
-| singer         | string        |          |                                                                                          
+| rowkey         | string        |
+|  singer        | string        |          |                                                                                          
 | song           | string        |          |                                                                                          
 | duration       | decimal(4,2)  |          |                                                                                          
 | musicdirector  | string        |          |                                                                                          
 +----------------+---------------+----------+ 
 
-iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer1','Song1',4.35,'AK')  ;
-iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer1','Song2', 3.54 ,'JK');
-iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer1','Song3', 2.03 ,'JK');
-iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer2','Song4', 1.54 ,'AK');
-iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer2','Song5', 3.43 ,'FG');
-iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer3','Song6', 2.03 ,'JK');
-iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer3','Song1', 1.54 ,'AK');
-iNSERT INTO TABLE album(singer, song,duration, musicdirector) VALUES('Singer4','Song2', 3.43 ,'FG');
+iNSERT INTO TABLE albumdj (rowkey, singer, song,duration, musicdirector) VALUES('1','Singer1','Song1',4.35,'AK')  ;
+iNSERT INTO TABLE albumdj (rowkey, singer, song,duration, musicdirector) VALUES('2','Singer1','Song2', 3.54 ,'JK');
+iNSERT INTO TABLE albumdj (rowkey, singer, song,duration, musicdirector) VALUES('3','Singer1','Song3', 2.03 ,'JK');
+iNSERT INTO TABLE albumdj (rowkey, singer, song,duration, musicdirector) VALUES('4','Singer2','Song4', 1.54 ,'AK');
+iNSERT INTO TABLE albumdj (rowkey, singer, song,duration, musicdirector) VALUES('5','Singer2','Song5', 3.43 ,'FG');
+iNSERT INTO TABLE albumdj (rowkey, singer, song,duration, musicdirector) VALUES('6','Singer3','Song6', 2.03 ,'JK');
+iNSERT INTO TABLE albumdj (rowkey, singer, song,duration, musicdirector) VALUES('7','Singer3','Song1', 1.54 ,'AK');
+iNSERT INTO TABLE albumdj (rowkey, singer, song,duration, musicdirector) VALUES('8','Singer4','Song2', 3.43 ,'FG');
 
-CREATE TABLE albumtohbase(singer string , song string,duration decimal(4,2),musicdirector string)
+hive> select * from albumdj;                                                                                                            
+OK                                                                                                                                     
+1       Singer1 Song1   4.35    AK                                                                                                     
+2       Singer1 Song2   3.54    JK                                                                                                     
+3       Singer1 Song3   2.03    JK                                                                                                     
+4       Singer2 Song4   1.54    AK                                                                                                     
+5       Singer2 Song5   3.43    FG                                                                                                     
+6       Singer3 Song6   2.03    JK                                                                                                     
+7       Singer3 Song1   1.54    AK                                                                                                     
+8       Singer4 Song2   3.43    FG  
+
+CREATE TABLE albumdjtohbase(rowkey string, singer string , song string,duration decimal(4,2),musicdirector string)
 STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
-WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,info:song,info:duration,info:md')
-TBLPROPERTIES ('hbase.table.name' = 'djns:album') ;
+WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,info:singer , info:song,info:duration,info:md')
+TBLPROPERTIES ('hbase.table.name' = 'djns:albumdj') ;
 
-insert overwrite table albumtohbase select * from album;
+insert overwrite table albumdjtohbase select * from albumdj;
+
+hbase(main):002:0> scan 'djns:albumdj'                                                                                                 
+ROW                                COLUMN+CELL                                                                                         
+ 1                                 column=info:duration, timestamp=1699344585274, value=4.35                                           
+ 1                                 column=info:md, timestamp=1699344585274, value=AK                                                   
+ 1                                 column=info:singer, timestamp=1699344585274, value=Singer1                                          
+ 1                                 column=info:song, timestamp=1699344585274, value=Song1                                              
+ 2                                 column=info:duration, timestamp=1699344585274, value=3.54                                           
+ 2                                 column=info:md, timestamp=1699344585274, value=JK                                                   
+ 2                                 column=info:singer, timestamp=1699344585274, value=Singer1                                          
+ 2                                 column=info:song, timestamp=1699344585274, value=Song2                                              
+ 3                                 column=info:duration, timestamp=1699344585274, value=2.03                                           
+ 3                                 column=info:md, timestamp=1699344585274, value=JK                                                   
+ 3                                 column=info:singer, timestamp=1699344585274, value=Singer1                                          
+ 3                                 column=info:song, timestamp=1699344585274, value=Song3                                              
+ 4                                 column=info:duration, timestamp=1699344585274, value=1.54                                           
+ 4                                 column=info:md, timestamp=1699344585274, value=AK                                                   
+ 4                                 column=info:singer, timestamp=1699344585274, value=Singer2                                          
+ 4                                 column=info:song, timestamp=1699344585274, value=Song4                                              
+ 5                                 column=info:duration, timestamp=1699344585274, value=3.43                                           
+ 5                                 column=info:md, timestamp=1699344585274, value=FG                                                   
+ 5                                 column=info:singer, timestamp=1699344585274, value=Singer2                                          
+ 5                                 column=info:song, timestamp=1699344585274, value=Song5                                              
+ 6                                 column=info:duration, timestamp=1699344585274, value=2.03                                           
+ 6                                 column=info:md, timestamp=1699344585274, value=JK                                                   
+ 6                                 column=info:singer, timestamp=1699344585274, value=Singer3                                          
+ 6                                 column=info:song, timestamp=1699344585274, value=Song6                                              
+ 7                                 column=info:duration, timestamp=1699344585274, value=1.54                                           
+ 7                                 column=info:md, timestamp=1699344585274, value=AK                                                   
+ 7                                 column=info:singer, timestamp=1699344585274, value=Singer3                                          
+ 7                                 column=info:song, timestamp=1699344585274, value=Song1                                              
+ 8                                 column=info:duration, timestamp=1699344585274, value=3.43                                           
+ 8                                 column=info:md, timestamp=1699344585274, value=FG                                                   
+ 8                                 column=info:singer, timestamp=1699344585274, value=Singer4                                          
+ 8                                 column=info:song, timestamp=1699344585274, value=Song2 
+ 
+ 
+hbase(main):003:0> s:albumdj",{COLUMN=>['info:singer','info:song']}                                                                    
+ROW                                COLUMN+CELL                                                                                         
+ 1                                 column=info:singer, timestamp=1699344585274, value=Singer1                                          
+ 1                                 column=info:song, timestamp=1699344585274, value=Song1                                              
+ 2                                 column=info:singer, timestamp=1699344585274, value=Singer1                                          
+ 2                                 column=info:song, timestamp=1699344585274, value=Song2                                              
+ 3                                 column=info:singer, timestamp=1699344585274, value=Singer1                                          
+ 3                                 column=info:song, timestamp=1699344585274, value=Song3                                              
+ 4                                 column=info:singer, timestamp=1699344585274, value=Singer2                                          
+ 4                                 column=info:song, timestamp=1699344585274, value=Song4                                              
+ 5                                 column=info:singer, timestamp=1699344585274, value=Singer2                                          
+ 5                                 column=info:song, timestamp=1699344585274, value=Song5                                              
+ 6                                 column=info:singer, timestamp=1699344585274, value=Singer3                                          
+ 6                                 column=info:song, timestamp=1699344585274, value=Song6                                              
+ 7                                 column=info:singer, timestamp=1699344585274, value=Singer3                                          
+ 7                                 column=info:song, timestamp=1699344585274, value=Song1                                              
+ 8                                 column=info:singer, timestamp=1699344585274, value=Singer4                                          
+ 8                                 column=info:song, timestamp=1699344585274, value=Song2  
+ 
+ scan 'djns:albumdj', {COLUMNS=>['info:singer','info:song','info:md'],FILTER => SingleColumnValueFilter.new(Bytes.toBytes('info'), Bytes.toBytes('md'),CompareFilter::CompareOp.valueOf('EQUAL'),BinaryComparator.new(Bytes.toBytes('AK')))}
+ ROW                                COLUMN+CELL                                                                                         
+ 1                                 column=info:md, timestamp=1699344585274, value=AK                                                   
+ 1                                 column=info:singer, timestamp=1699344585274, value=Singer1                                          
+ 1                                 column=info:song, timestamp=1699344585274, value=Song1                                              
+ 4                                 column=info:md, timestamp=1699344585274, value=AK                                                   
+ 4                                 column=info:singer, timestamp=1699344585274, value=Singer2                                          
+ 4                                 column=info:song, timestamp=1699344585274, value=Song4                                              
+ 7                                 column=info:md, timestamp=1699344585274, value=AK                                                   
+ 7                                 column=info:singer, timestamp=1699344585274, value=Singer3                                          
+ 7                                 column=info:song, timestamp=1699344585274, value=Song1   
