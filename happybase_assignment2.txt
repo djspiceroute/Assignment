@@ -1,0 +1,73 @@
+
+import happybase
+
+connection = happybase.Connection('10.1.1.204',9090)
+
+table = connection.table('djns:stockcmntsymbl')
+
+
+for key, data in table.scan():
+    print(key,data)
+    
+#row1 = table.row(b'EPAM:comment1',b'EPAM:comment2',b'EXC:comment1')
+#row2 = table.row(b'EXC:comment2',b'INFI:comment1',b'INFI:comment2')
+#print(row1[b'info:comment'])
+#print(row2[b'info:comment'])
+
+for key, data in table.scan(filter="SingleColumnValueFilter('info','userid',=,'substring:user6')"):
+    print(key,data)
+    
+for key, data in table.scan(filter="SingleColumnValueFilter('info','active',=,'substring:False')"):
+    print(key,data)
+	
+
+b'APL:comment1' {b'info:active': b'True', b'info:comment': b'This stock will eventually make money.', b'info:user_display_name': b'Federer', b'info:userid': b'user3'}
+b'APL:comment2' {b'info:active': b'False', b'info:comment': b'Could be a big winner', b'info:user_display_name': b'Federer', b'info:userid': b'user3'}
+b'BHD:comment1' {b'info:active': b'True', b'info:comment': b'This stock is undervalued', b'info:user_display_name': b'The Ex-Governator', b'info:userid': b'user2'}
+b'BHD:comment2' {b'info:active': b'False', b'info:comment': b'This stock is going nowhere.', b'info:user_display_name': b'The Ex-Governator', b'info:userid': b'user2'}
+b'EPAM:comment1' {b'info:active': b'True', b'info:comment': b'This is a great stock', b'info:user_display_name': b'GreatUser', b'info:userid': b'user1'}
+b'EPAM:comment2' {b'info:active': b'True', b'info:comment': b'This is increasing', b'info:user_display_name': b'GreatUser', b'info:userid': b'user1'}
+b'EXC:comment1' {b'info:active': b'True', b'info:comment': b'I have this one on my radar.', b'info:user_display_name': b'King James', b'info:userid': b'user4'}
+b'EXC:comment2' {b'info:active': b'True', b'info:comment': b'Interesting value proposition but too early to know if they will survive.', b'info:user_display_name': b'King James', b'info:userid': b'user4'}
+b'INFI:comment1' {b'info:active': b'False', b'info:comment': b'Buy it now before the rush.', b'info:user_display_name': b'Time World Series Winner', b'info:userid': b'user6'}
+b'INFI:comment2' {b'info:active': b'True', b'info:comment': b'Dump this one fast!', b'info:user_display_name': b'Time World Series Winner', b'info:userid': b'user6'}
+b'INFI:comment1' {b'info:active': b'False', b'info:comment': b'Buy it now before the rush.', b'info:user_display_name': b'Time World Series Winner', b'info:userid': b'user6'}
+b'INFI:comment2' {b'info:active': b'True', b'info:comment': b'Dump this one fast!', b'info:user_display_name': b'Time World Series Winner', b'info:userid': b'user6'}
+b'APL:comment2' {b'info:active': b'False', b'info:comment': b'Could be a big winner', b'info:user_display_name': b'Federer', b'info:userid': b'user3'}
+b'BHD:comment2' {b'info:active': b'False', b'info:comment': b'This stock is going nowhere.', b'info:user_display_name': b'The Ex-Governator', b'info:userid': b'user2'}
+b'INFI:comment1' {b'info:active': b'False', b'info:comment': b'Buy it now before the rush.', b'info:user_display_name': b'Time World Series Winner', b'info:userid': b'user6'}
+
+
+_______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+import happybase
+connection = happybase.Connection('10.1.1.204', 9090)
+table = connection.table('djns:albumdj')
+
+for key, data in table.scan():
+    print(key,data)
+
+for key, data in table.scan(filter="SingleColumnValueFilter('info','singer',=,'substring:Singer2')"):
+    print(key,data)
+
+for key, data in table.scan(filter="SingleColumnValueFilter('info','md',=,'substring:AK')"):
+    print(key,data)
+	
+b'1' {b'info:duration': b'4.35', b'info:md': b'AK', b'info:singer': b'Singer1', b'info:song': b'Song1'}
+b'2' {b'info:duration': b'3.54', b'info:md': b'JK', b'info:singer': b'Singer1', b'info:song': b'Song2'}
+b'3' {b'info:duration': b'2.03', b'info:md': b'JK', b'info:singer': b'Singer1', b'info:song': b'Song3'}
+b'4' {b'info:duration': b'1.54', b'info:md': b'AK', b'info:singer': b'Singer2', b'info:song': b'Song4'}
+b'5' {b'info:duration': b'3.43', b'info:md': b'FG', b'info:singer': b'Singer2', b'info:song': b'Song5'}
+b'6' {b'info:duration': b'2.03', b'info:md': b'JK', b'info:singer': b'Singer3', b'info:song': b'Song6'}
+b'7' {b'info:duration': b'1.54', b'info:md': b'AK', b'info:singer': b'Singer3', b'info:song': b'Song1'}
+b'8' {b'info:duration': b'3.43', b'info:md': b'FG', b'info:singer': b'Singer4', b'info:song': b'Song2'}
+_ _ _ _ _______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+b'4' {b'info:duration': b'1.54', b'info:md': b'AK', b'info:singer': b'Singer2', b'info:song': b'Song4'}
+b'5' {b'info:duration': b'3.43', b'info:md': b'FG', b'info:singer': b'Singer2', b'info:song': b'Song5'}
+_ _ _ _ _______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+b'1' {b'info:duration': b'4.35', b'info:md': b'AK', b'info:singer': b'Singer1', b'info:song': b'Song1'}
+b'4' {b'info:duration': b'1.54', b'info:md': b'AK', b'info:singer': b'Singer2', b'info:song': b'Song4'}
+b'7' {b'info:duration': b'1.54', b'info:md': b'AK', b'info:singer': b'Singer3', b'info:song': b'Song1'}
+
