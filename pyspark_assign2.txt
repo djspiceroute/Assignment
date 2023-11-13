@@ -1,0 +1,83 @@
+hdfs dfs -put crime_incidents_2013.csv
+hdfs dfs -ls
+
+crimedf=spark.read.option("header",True).option("inferschema",True).csv("crime_incidents_2013.csv")
+crimedf.createOrReplaceTempView("crimedj")
+crimedf.printSchema()
+root                                                                                                                                   
+ |-- CCN: integer (nullable = true)                                                                                                    
+ |-- REPORTDATETIME: string (nullable = true)                                                                                          
+ |-- SHIFT: string (nullable = true)                                                                                                   
+ |-- OFFENSE: string (nullable = true)                                                                                                 
+ |-- METHOD: string (nullable = true)                                                                                                  
+ |-- LASTMODIFIEDDATE: string (nullable = true)                                                                                        
+ |-- BLOCKSITEADDRESS: string (nullable = true)                                                                                        
+ |-- BLOCKXCOORD: double (nullable = true)                                                                                             
+ |-- BLOCKYCOORD: double (nullable = true)                                                                                             
+ |-- WARD: integer (nullable = true)                                                                                                   
+ |-- ANC: string (nullable = true)                                                                                                     
+ |-- DISTRICT: string (nullable = true)                                                                                                
+ |-- PSA: string (nullable = true)                                                                                                     
+ |-- NEIGHBORHOODCLUSTER: integer (nullable = true)                                                                                    
+ |-- BUSINESSIMPROVEMENTDISTRICT: string (nullable = true)                                                                             
+ |-- BLOCK_GROUP: string (nullable = true)                                                                                             
+ |-- CENSUS_TRACT: integer (nullable = true)                                                                                           
+ |-- VOTING_PRECINCT: string (nullable = true)                                                                                         
+ |-- START_DATE: string (nullable = true)                                                                                              
+ |-- END_DATE: string (nullable = true) 
+crimedf.show()
+
+spark.sql("SELECT count(distinct OFFENSE) from crimedj").show()
++-----------------------+
+|count(DISTINCT OFFENSE)|                                                                                                              
++-----------------------+                                                                                                              
+|                      9|                                                                                                              
++-----------------------+  
+spark.sql("SELECT OFFENSE ,count(CCN) from crimedj group by OFFENSE").show()
++--------------------+----------+
+|             OFFENSE|count(CCN)|                                                                                                      
++--------------------+----------+                                                                                                      
+|ASSAULT W/DANGERO...|      2311|                                                                                                      
+|        THEFT F/AUTO|     10134|                                                                                                      
+|               ARSON|        35|                                                                                                      
+| MOTOR VEHICLE THEFT|      2677|                                                                                                      
+|             ROBBERY|      4072|                                                                                                      
+|            HOMICIDE|       104|                                                                                                      
+|           SEX ABUSE|       299|                                                                                                      
+|         THEFT/OTHER|     12894|                                                                                                      
+|            BURGLARY|      3369|                                                                                                      
++--------------------+----------+
+spark.sql("SELECT METHOD ,count(METHOD) from crimedj where OFFENSE = 'HOMICIDE' group by METHOD").show()
++------+-------------+
+|METHOD|count(METHOD)|                                                                                                                 
++------+-------------+                                                                                                                 
+|OTHERS|           12|                                                                                                                 
+| KNIFE|           11|                                                                                                                 
+|   GUN|           81|                                                                                                                 
++------+-------------+ 
+
+spark.sql("SELECT SHIFT ,max(CCN) from crimedj group by SHIFT order by 2 desc").show(1)
++-------+--------+
+|  SHIFT|max(CCN)|                                                                                                                     
++-------+--------+                                                                                                                     
+|EVENING|14400271|                                                                                                                     
++-------+--------+
+
+spark.sql("SELECT SHIFT ,max(CCN) from crimedj group by SHIFT").show()
+
++--------+--------+                                                                                                                    
+|   SHIFT|max(CCN)|                                                                                                                    
++--------+--------+                                                                                                                    
+|MIDNIGHT|14400005|                                                                                                                    
+| EVENING|14400271|                                                                                                                    
+|     DAY|14400265|                                                                                                                    
++--------+--------+  
+
+spark.sql("SELECT SHIFT ,max(CCN) from crimedj group by SHIFT order by 2 desc").show()
++--------+--------+
+|   SHIFT|max(CCN)|                                                                                                                    
++--------+--------+                                                                                                                    
+| EVENING|14400271|                                                                                                                    
+|     DAY|14400265|                                                                                                                    
+|MIDNIGHT|14400005|                                                                                                                    
++--------+--------+  
