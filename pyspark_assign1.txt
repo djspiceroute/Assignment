@@ -1,0 +1,232 @@
+hdfs dfs -put country_wise_latest.csv
+avricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -ls                                                                                      
+Found 12 items                                                                                                                         
+drwx------   - mavricbdhoct01231 mavricbdhoct01231          0 2023-11-03 12:00 .Trash                                                  
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-11-07 10:30 .sparkStaging                                           
+drwx------   - mavricbdhoct01231 mavricbdhoct01231          0 2023-11-07 08:09 .staging                                                
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-30 07:09 TicketsDB_DJ                                            
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231      14784 2023-11-13 06:29 country_wise_latest.csv                                 
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231   13586439 2023-11-07 09:32 customer_complaints.json                                
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-30 14:20 data                                                    
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-30 13:32 drivers                                                 
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231     186789 2023-11-07 09:59 movies.dat                                              
+-rw-r--r--   3 mavricbdhoct01231 mavricbdhoct01231        243 2023-11-06 09:54 people.csv                                              
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-30 13:14 timesheet                                               
+drwxr-xr-x   - mavricbdhoct01231 mavricbdhoct01231          0 2023-10-25 11:50 userratings
+
+coviddf=spark.read.option("header",True).option("inferschema",True).csv("country_wise_latest.csv")
+
+coviddf.createOrReplaceTempView("covid")
+
+coviddf.printSchema()
+root                                                                                                                                   
+ |-- Country/Region: string (nullable = true)                                                                                          
+ |-- Confirmed: integer (nullable = true)                                                                                              
+ |-- Deaths: integer (nullable = true)                                                                                                 
+ |-- Recovered: integer (nullable = true)                                                                                              
+ |-- Active: integer (nullable = true)                                                                                                 
+ |-- New cases: integer (nullable = true)                                                                                              
+ |-- New deaths: integer (nullable = true)                                                                                             
+ |-- New recovered: integer (nullable = true)                                                                                          
+ |-- Deaths / 100 Cases: double (nullable = true)                                                                                      
+ |-- Recovered / 100 Cases: double (nullable = true)                                                                                   
+ |-- Deaths / 100 Recovered: string (nullable = true)                                                                                  
+ |-- Confirmed last week: integer (nullable = true)                                                                                    
+ |-- 1 week change: integer (nullable = true)                                                                                          
+ |-- 1 week % increase: double (nullable = true)                                                                                       
+ |-- WHO Region: string (nullable = true)
+
+coviddf.show()
++-------------------+---------+------+---------+------+---------+----------+-------------+------------------+---------------------+----
+------------------+-------------------+-------------+-----------------+--------------------+                                           
+|     Country/Region|Confirmed|Deaths|Recovered|Active|New cases|New deaths|New recovered|Deaths / 100 Cases|Recovered / 100 Cases|Deat
+hs / 100 Recovered|Confirmed last week|1 week change|1 week % increase|          WHO Region|                                           
++-------------------+---------+------+---------+------+---------+----------+-------------+------------------+---------------------+----
+------------------+-------------------+-------------+-----------------+--------------------+                                           
+|        Afghanistan|    36263|  1269|    25198|  9796|      106|        10|           18|               3.5|                69.49|    
+              5.04|              35526|          737|             2.07|Eastern Mediterra...|                                           
+|            Albania|     4880|   144|     2745|  1991|      117|         6|           63|              2.95|                56.25|    
+              5.25|               4171|          709|             17.0|              Europe|                                           
+|            Algeria|    27973|  1163|    18837|  7973|      616|         8|          749|              4.16|                67.34|    
+              6.17|              23691|         4282|            18.07|              Africa|                                           
+|            Andorra|      907|    52|      803|    52|       10|         0|            0|              5.73|                88.53|    
+              6.48|                884|           23|              2.6|              Europe|                                           
+|             Angola|      950|    41|      242|   667|       18|         1|            0|              4.32|                25.47|    
+             16.94|                749|          201|            26.84|              Africa|                                           
+|Antigua and Barbuda|       86|     3|       65|    18|        4|         0|            5|              3.49|                75.58|    
+              4.62|                 76|           10|            13.16|            Americas|                                           
+|          Argentina|   167416|  3059|    72575| 91782|     4890|       120|         2057|              1.83|                43.35|    
+              4.21|             130774|        36642|            28.02|            Americas|                                           
+|            Armenia|    37390|   711|    26665| 10014|       73|         6|          187|               1.9|                71.32|    
+              2.67|              34981|         2409|             6.89|              Europe|                                           
+|          Australia|    15303|   167|     9311|  5825|      368|         6|          137|              1.09|                60.84|    
+              1.79|              12428|         2875|            23.13|     Western Pacific|                                           
+|            Austria|    20558|   713|    18246|  1599|       86|         1|           37|              3.47|                88.75|    
+              3.91|              19743|          815|             4.13|              Europe|                                           
+|         Azerbaijan|    30446|   423|    23242|  6781|      396|         6|          558|              1.39|                76.34|    
+              1.82|              27890|         2556|             9.16|              Europe|                                           
+|            Bahamas|      382|    11|       91|   280|       40|         0|            0|              2.88|                23.82|    
+             12.09|                174|          208|           119.54|            Americas|                                           
+|            Bahrain|    39482|   141|    36110|  3231|      351|         1|          421|              0.36|                91.46|    
+              0.39|              36936|         2546|             6.89|Eastern Mediterra...|                                           
+|         Bangladesh|   226225|  2965|   125683| 97577|     2772|        37|         1801|              1.31|                55.56|    
+              2.36|             207453|        18772|             9.05|     South-East Asia|                                           
+|           Barbados|      110|     7|       94|     9|        0|         0|            0|              6.36|                85.45|    
+              7.45|                106|            4|             3.77|            Americas|                                           
+|            Belarus|    67251|   538|    60492|  6221|      119|         4|           67|               0.8|                89.95|    
+              0.89|              66213|         1038|             1.57|              Europe|                                           
+|            Belgium|    66428|  9822|    17452| 39154|      402|         1|           14|             14.79|                26.27|    
+             56.28|              64094|         2334|             3.64|              Europe|                                           
+|             Belize|       48|     2|       26|    20|        0|         0|            0|              4.17|                54.17|    
+              7.69|                 40|            8|             20.0|            Americas|                                           
+|              Benin|     1770|    35|     1036|   699|        0|         0|            0|              1.98|                58.53|    
+              3.38|               1602|          168|            10.49|              Africa|                                           
+|             Bhutan|       99|     0|       86|    13|        4|         0|            1|               0.0|                86.87|    
+               0.0|                 90|            9|             10.0|     South-East Asia|                                           
++-------------------+---------+------+---------+------+---------+----------+-------------+------------------+---------------------+----
+------------------+-------------------+-------------+-----------------+--------------------+                                           
+only showing top 20 rows                                                                                                               
+                                                                                             
+																							 
+
+coviddf.withColumnRenamed("Deathsper100 Recovered","Deathsper100_Recovered").show(truncate=False)
+
+
+ from functools import reduce
+
+ oldColumns = coviddf.schema.names
+ newColumns = ["country","confirmed","deaths","recovered","active","new_cases","new_deaths","new_recovered","deathsper100_Cases","recoveredper100_Cases","deathsper100_recovered","confirmed_last_week","1weekchange","1week_increase","WHORegion"]
+
+ dfl = reduce(lambda coviddf, idx: coviddf.withColumnRenamed(oldColumns[idx], newColumns[idx]), range(len(oldColumns)), coviddf)
+ dfl.printSchema()
+ dfl.show()
+
+                                                                                                                 
+root                                                                                                                                   
+ |-- country: string (nullable = true)                                                                                                 
+ |-- confirmed: integer (nullable = true)                                                                                              
+ |-- deaths: integer (nullable = true)                                                                                                 
+ |-- recovered: integer (nullable = true)                                                                                              
+ |-- active: integer (nullable = true)                                                                                                 
+ |-- new_cases: integer (nullable = true)                                                                                              
+ |-- new_deaths: integer (nullable = true)                                                                                             
+ |-- new_recovered: integer (nullable = true)                                                                                          
+ |-- deathsper100_Cases: double (nullable = true)                                                                                      
+ |-- recoveredper100_Cases: double (nullable = true)                                                                                   
+ |-- deathsper100_recovered: string (nullable = true)                                                                                  
+ |-- confirmed_last_week: integer (nullable = true)                                                                                    
+ |-- 1weekchange: integer (nullable = true)                                                                                            
+ |-- 1week_increase: double (nullable = true)                                                                                          
+ |-- WHORegion: string (nullable = true)                                                                                               
+                                         
+ 
+import pyspark.sql.functions as F  
+
+>>> df = coviddf                                                                                                                       
+>>> df_agg = df.agg(*[F.count(F.when(F.isnull(c), c)).alias(c) for c in df.columns])                                                   
+>>> df_agg.show()                                                                                                                      
++--------------+---------+------+---------+------+---------+----------+-------------+------------------+---------------------+---------
+-------------+-------------------+-------------+-----------------+----------+                                                          
+|Country/Region|Confirmed|Deaths|Recovered|Active|New cases|New deaths|New recovered|Deaths / 100 Cases|Recovered / 100 Cases|Deaths / 
+100 Recovered|Confirmed last week|1 week change|1 week % increase|WHO Region|                                                          
++--------------+---------+------+---------+------+---------+----------+-------------+------------------+---------------------+---------
+-------------+-------------------+-------------+-----------------+----------+                                                          
+|             0|        0|     0|        0|     0|        0|         0|            0|                 0|                    0|         
+            0|                  0|            0|                0|         0|                                                          
++--------------+---------+------+---------+------+---------+----------+-------------+------------------+---------------------+---------
+-------------+-------------------+-------------+-----------------+----------+ 
+
+df1=coviddf.selectExpr
+dfl.createOrReplaceTempView("coviddj")
+
+
+
+spark.sql( "SELECT country,WHORegion,sum(Confirmed) FROM coviddj GROUP BY country,WHORegion").show()
++--------------------+--------------------+--------------+
+|             country|           WHORegion|sum(Confirmed)|                                                                             
++--------------------+--------------------+--------------+                                                                             
+|               Niger|              Africa|          1132|                                                                             
+|              Turkey|              Europe|        227019|                                                                             
+|               Japan|     Western Pacific|         31142|                                                                             
+|               Yemen|Eastern Mediterra...|          1691|                                                                             
+|            Colombia|            Americas|        257101|                                                                             
+|              Malawi|              Africa|          3664|                                                                             
+|         Afghanistan|Eastern Mediterra...|         36263|                                                                             
+|United Arab Emirates|Eastern Mediterra...|         59177|                                                                             
+|             Tunisia|Eastern Mediterra...|          1455|                                                                             
+|               Libya|Eastern Mediterra...|          2827|                                                                             
+|       Liechtenstein|              Europe|            86|                                                                             
+|              Norway|              Europe|          9132|                                                                             
+|               Kenya|              Africa|         17975|                                                                             
+|             Ukraine|              Europe|         67096|                                                                             
+|            Ethiopia|              Africa|         14547|                                                                             
+|               Qatar|Eastern Mediterra...|        109597|                                                                             
+|                Mali|              Africa|          2513|                                                                             
+|              Guinea|              Africa|          7055|                                                                             
+|Sao Tome and Prin...|              Africa|           865|                                                                             
+|           Singapore|     Western Pacific|         50838|                                                                             
++--------------------+--------------------+--------------+   
+
+spark.sql( "SELECT country,WHORegion,Confirmed FROM coviddj").show()
++-------------------+--------------------+---------+                                                                                   
+|            country|           WHORegion|Confirmed|                                                                                   
++-------------------+--------------------+---------+                                                                                   
+|        Afghanistan|Eastern Mediterra...|    36263|                                                                                   
+|            Albania|              Europe|     4880|                                                                                   
+|            Algeria|              Africa|    27973|                                                                                   
+|            Andorra|              Europe|      907|                                                                                   
+|             Angola|              Africa|      950|                                                                                   
+|Antigua and Barbuda|            Americas|       86|                                                                                   
+|          Argentina|            Americas|   167416|                                                                                   
+|            Armenia|              Europe|    37390|                                                                                   
+|          Australia|     Western Pacific|    15303|                                                                                   
+|            Austria|              Europe|    20558|                                                                                   
+|         Azerbaijan|              Europe|    30446|                                                                                   
+|            Bahamas|            Americas|      382|                                                                                   
+|            Bahrain|Eastern Mediterra...|    39482|                                                                                   
+|         Bangladesh|     South-East Asia|   226225|                                                                                   
+|           Barbados|            Americas|      110|                                                                                   
+|            Belarus|              Europe|    67251|                                                                                   
+|            Belgium|              Europe|    66428|                                                                                   
+|             Belize|            Americas|       48|                                                                                   
+|              Benin|              Africa|     1770|                                                                                   
+|             Bhutan|     South-East Asia|       99|                                                                                   
++-------------------+--------------------+---------+    
+
+spark.sql( "SELECT country,WHORegion,sum(confirmed) FROM coviddj GROUP BY country,WHORegion order by 3 asc").show(10)
++--------------------+---------------+--------------+
+|             country|      WHORegion|sum(confirmed)|                                                                                  
++--------------------+---------------+--------------+                                                                                  
+|      Western Sahara|         Africa|            10|                                                                                  
+|            Holy See|         Europe|            12|                                                                                  
+|           Greenland|         Europe|            14|                                                                                  
+|Saint Kitts and N...|       Americas|            17|                                                                                  
+|            Dominica|       Americas|            18|                                                                                  
+|                Laos|Western Pacific|            20|                                                                                  
+|             Grenada|       Americas|            23|                                                                                  
+|         Saint Lucia|       Americas|            24|                                                                                  
+|         Timor-Leste|South-East Asia|            24|                                                                                  
+|                Fiji|Western Pacific|            27|                                                                                  
++--------------------+---------------+--------------+ 
+
+spark.sql("SELECT count(distinct country), count(distinct WHORegion) from coviddj").show()
+
++-----------------------+-------------------------+
+|count(DISTINCT country)|count(DISTINCT WHORegion)|                                                                                    
++-----------------------+-------------------------+                                                                                    
+|                    187|                        6|                                                                                    
++-----------------------+-------------------------+  
+
+spark.sql("SELECT distinct WHORegion from coviddj").show()
+
++--------------------+
+|           WHORegion|                                                                                                                 
++--------------------+                                                                                                                 
+|              Europe|                                                                                                                 
+|     Western Pacific|                                                                                                                 
+|              Africa|                                                                                                                 
+|Eastern Mediterra...|                                                                                                                 
+|            Americas|                                                                                                                 
+|     South-East Asia|                                                                                                                 
++--------------------+ 
+
