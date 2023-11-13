@@ -1,0 +1,160 @@
+hdfs dfs -put order_items.csv
+hdfs dfs -put orders.csv
+hdfs dfs -put products.csv
+
+
+oidf=spark.read.option("header",True).option("inferschema",True).csv("order_items.csv")
+oidf.createOrReplaceTempView("orderitems")
+oidf.printSchema()
+root                                                                                                                                   
+ |-- order_item_id: integer (nullable = true)                                                                                          
+ |-- order_item_order_id: integer (nullable = true)                                                                                    
+ |-- order_item_product_id: integer (nullable = true)                                                                                  
+ |-- order_item_quantity: integer (nullable = true)                                                                                    
+ |-- order_item_subtotal: double (nullable = true)                                                                                     
+ |-- order_item_product_price: double (nullable = true)
+
+odf=spark.read.option("header",True).option("inferschema",True).csv("orders.csv")
+odf.createOrReplaceTempView("orders")
+odf.printSchema()
+root                                                                                                                                   
+ |-- order_id: integer (nullable = true)                                                                                               
+ |-- order_date: string (nullable = true)                                                                                              
+ |-- order_customer_id: integer (nullable = true)                                                                                      
+ |-- order_status: string (nullable = true) 
+
+
+pdf=spark.read.option("header",True).option("inferschema",True).csv("products.csv")
+pdf.createOrReplaceTempView("products")
+pdf.printSchema()
+root                                                                                                                                   
+ |-- product_id: integer (nullable = true)                                                                                             
+ |-- product_category_id: integer (nullable = true)                                                                                    
+ |-- product_name: string (nullable = true)                                                                                            
+ |-- product_description: string (nullable = true)                                                                                     
+ |-- product_price: double (nullable = true)                                                                                           
+ |-- product_image: string (nullable = true)
+
+spark.sql("SELECT order_status,o.order_date, p.product_name ,sum(ot.order_item_subtotal) as revenue from orders o join orderitems ot on o.order_id = ot.order_item_order_id join products p on p.product_id = ot.order_item_product_id where o.order_status in ('CLOSED','COMPLETE') group by order_status,o.order_date, p.product_name").show()
+
++------------+----------------+--------------------+------------------+
+|order_status|      order_date|        product_name|           revenue|                                                                
++------------+----------------+--------------------+------------------+                                                                
+|    COMPLETE|02-08-2013 00:00|Bag Boy Beverage ...|             99.96|                                                                
+|      CLOSED|14-08-2013 00:00|Under Armour Wome...|             63.98|                                                                
+|    COMPLETE|15-08-2013 00:00|ENO Atlas Hammock...|            119.96|                                                                
+|    COMPLETE|23-08-2013 00:00|O'Brien Men's Neo...| 3498.600000000001|                                                                
+|    COMPLETE|28-08-2013 00:00|Nike Men's CJ Eli...|1819.8600000000001|                                                                
+|      CLOSED|30-08-2013 00:00|LIJA Women's Eyel...|             130.0|                                                                
+|      CLOSED|03-10-2013 00:00|Pelican Sunstream...|            799.96|                                                                
+|      CLOSED|04-10-2013 00:00|Under Armour Girl...|319.91999999999996|                                                                
+|      CLOSED|08-10-2013 00:00|Nike Men's CJ Eli...|           2079.84|                                                                
+|      CLOSED|10-10-2013 00:00|Perfect Fitness P...|           1559.74|                                                                
+|    COMPLETE|11-10-2013 00:00|Bridgestone e6 St...|            159.95|                                                                
+|    COMPLETE|12-10-2013 00:00|Pelican Sunstream...|2999.8499999999995|                                                                
+|    COMPLETE|17-10-2013 00:00|adidas Kids' F5 M...|            104.97|                                                                
+|    COMPLETE|20-10-2013 00:00|Hirzl Women's Hyb...|             44.97|                                                                
+|    COMPLETE|30-10-2013 00:00|Nike Men's Dri-FI...|            1350.0|                                                                
+|    COMPLETE|02-11-2013 00:00|Perfect Fitness P...|3359.4399999999996|                                                                
+|    COMPLETE|09-11-2013 00:00|Under Armour Kids...|            139.95|                                                                
+|    COMPLETE|11-11-2013 00:00|Diamondback Women...| 5699.619999999999|                                                                
+|    COMPLETE|18-11-2013 00:00|Team Golf New Eng...|             24.99|                                                                
+|    COMPLETE|01-12-2013 00:00|Team Golf Tenness...|             74.97|                                                                
++------------+----------------+--------------------+------------------+   
+
+spark.sql("SELECT order_status, count(order_id) from orders group by order_status").show()
+
++---------------+---------------+
+|   order_status|count(order_id)|                                                                                                      
++---------------+---------------+                                                                                                      
+|PENDING_PAYMENT|          15030|                                                                                                      
+|       COMPLETE|          22899|                                                                                                      
+|        ON_HOLD|           3798|                                                                                                      
+| PAYMENT_REVIEW|            729|                                                                                                      
+|     PROCESSING|           8275|                                                                                                      
+|         CLOSED|           7556|                                                                                                      
+|SUSPECTED_FRAUD|           1558|                                                                                                      
+|        PENDING|           7610|                                                                                                      
+|       CANCELED|           1428|                                                                                                      
++---------------+---------------+    
+
+odf.filter(df.order_status == 'CLOSED').show(truncate=False)
+odf.filter(odf.order_status == 'COMPLETE').show(truncate=False) 
+
++--------+----------------+-----------------+------------+                                                                             
+|order_id|order_date      |order_customer_id|order_status|                                                                             
++--------+----------------+-----------------+------------+                                                                             
+|3       |25-07-2013 00:00|12111            |COMPLETE    |                                                                             
+|5       |25-07-2013 00:00|11318            |COMPLETE    |                                                                             
+|6       |25-07-2013 00:00|7130             |COMPLETE    |                                                                             
+|7       |25-07-2013 00:00|4530             |COMPLETE    |                                                                             
+|15      |25-07-2013 00:00|2568             |COMPLETE    |                                                                             
+|17      |25-07-2013 00:00|2667             |COMPLETE    |                                                                             
+|22      |25-07-2013 00:00|333              |COMPLETE    |                                                                             
+|26      |25-07-2013 00:00|7562             |COMPLETE    |                                                                             
+|28      |25-07-2013 00:00|656              |COMPLETE    |                                                                             
+|32      |25-07-2013 00:00|3960             |COMPLETE    |                                                                             
+|35      |25-07-2013 00:00|4840             |COMPLETE    |                                                                             
+|45      |25-07-2013 00:00|2636             |COMPLETE    |                                                                             
+|56      |25-07-2013 00:00|10519            |COMPLETE    |                                                                             
+|63      |25-07-2013 00:00|1148             |COMPLETE    |                                                                             
+|65      |25-07-2013 00:00|5903             |COMPLETE    |                                                                             
+|67      |25-07-2013 00:00|1406             |COMPLETE    |                                                                             
+|71      |25-07-2013 00:00|8646             |COMPLETE    |                                                                             
+|72      |25-07-2013 00:00|4349             |COMPLETE    |                                                                             
+|76      |25-07-2013 00:00|6898             |COMPLETE    |                                                                             
+|80      |25-07-2013 00:00|3007             |COMPLETE    |                                                                             
++--------+----------------+-----------------+------------+  
+
+spark.sql("SELECT o.order_date, p.product_name ,sum(ot.order_item_subtotal) as revenue from orders o join orderitems ot on o.order_id = ot.order_item_order_id join products p on p.product_id = ot.order_item_product_id group by o.order_date, p.product_name").show()
+
++----------------+--------------------+------------------+
+|      order_date|        product_name|           revenue|                                                                             
++----------------+--------------------+------------------+                                                                             
+|05-08-2013 00:00|Clicgear Rovic Co...|             39.99|                                                                             
+|27-08-2013 00:00|Clicgear 8.0 Shoe...|             39.96|                                                                             
+|03-09-2013 00:00|Field & Stream Sp...|19998.999999999985|                                                                             
+|05-09-2013 00:00|Titleist Pro V1x ...|            239.95|                                                                             
+|19-09-2013 00:00|Diamondback Women...| 9299.379999999994|                                                                             
+|24-09-2013 00:00|Under Armour Kids...|223.92000000000002|                                                                             
+|08-10-2013 00:00|Titleist Pro V1x ...|            259.95|                                                                             
+|19-10-2013 00:00|Clicgear Rovic Co...|            159.96|                                                                             
+|23-10-2013 00:00|Perfect Fitness P...| 14757.53999999999|                                                                             
+|24-10-2013 00:00|Nike Men's Deutsc...|             120.0|                                                                             
+|27-10-2013 00:00|Columbia Men's PF...|             240.0|                                                                             
+|28-10-2013 00:00|Bridgestone e6 St...|             31.99|                                                                             
+|02-11-2013 00:00|O'Brien Men's Neo...| 5647.739999999999|                                                                             
+|02-11-2013 00:00|Nike Women's Lege...|              25.0|                                                                             
+|07-11-2013 00:00|ENO Atlas Hammock...|             89.97|                                                                             
+|09-11-2013 00:00|Nike Men's Dri-FI...|            7950.0|                                                                             
+|10-11-2013 00:00|Nike Men's Free 5...| 9299.069999999998|                                                                             
+|18-11-2013 00:00|Hirzl Women's Sof...|             71.96|                                                                             
+|18-11-2013 00:00|Team Golf San Fra...|             24.99|                                                                             
+|24-11-2013 00:00|Columbia Men's PF...|              30.0|                                                                             
++----------------+--------------------+------------------+  
+
+
+
+from pyspark.sql import SparkSession
+ 
+spark=SparkSession.builder.appName("Spark Hive").enableHiveSupport().config("spark.sql.warehouse.dir","/user/hive/warehouse").getOrCreate()
+spark.sparkContext.setLogLevel("ERROR")                                                                                            
+df = spark.sql("SELECT o.order_date, p.product_name ,sum(ot.order_item_subtotal) as revenue from orders o join orderitems ot on o.order_id = ot.order_item_order_id join products p on p.product_id = ot.order_item_product_id  group by o.order_date, p.product_name")  
+df.show()
+df.write.partitionBy("product_name").mode("overwrite").saveAsTable("djhive.daily_revenue")
+
+HIVE SHELL:
+use djhive;
+show tables;
+hive> select * from daily_revenue limit 10;                                                                                            
+OK                                                                                                                                     
+17-04-2014 00:00        159.99  adidas Brazuca 2014 Official Match Ball                                                                
+01-11-2013 00:00        159.99  adidas Brazuca 2014 Official Match Ball                                                                
+03-08-2013 00:00        159.99  adidas Brazuca 2014 Official Match Ball                                                                
+06-08-2013 00:00        159.99  adidas Brazuca 2014 Official Match Ball                                                                
+26-12-2013 00:00        159.99  adidas Brazuca 2014 Official Match Ball                                                                
+25-12-2013 00:00        159.99  adidas Brazuca 2014 Official Match Ball                                                                
+29-10-2013 00:00        159.99  adidas Brazuca 2014 Official Match Ball                                                                
+17-05-2014 00:00        159.99  adidas Brazuca 2014 Official Match Ball                                                                
+20-05-2014 00:00        159.99  adidas Brazuca 2014 Official Match Ball                                                                
+10-04-2014 00:00        159.99  adidas Brazuca 2014 Official Match Ball 
