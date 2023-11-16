@@ -1,0 +1,498 @@
+[mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -mkdir -p prescpipeline/staging/city                                                     
+[mavricbdhoct01231@ip-10-1-1-204 ~]$                                                                                                   
+[mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -put  us_cities_dimension.parquet prescpipeline/staging/city                             
+[mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -cat prescpipeline/staging/city/us_cities_dimension.parquet | wc -l                      
+6604                              
+
+>>> cdf=spark.read.option("header",True).option("inferschema",True).parquet('prescpipeline/staging/city/us_cities_dimension.parquet')  
+>>>                                                                                                                                    
+>>> cdf.show(10)                                                                                                                       
++------------+------------+--------+--------------------+-----------+--------------------+-------+---------+----------+-------+--------
+-----------+--------------------+                                                                                                      
+|        city|  city_ascii|state_id|          state_name|county_fips|         county_name|    lat|      lng|population|density|        
+   timezone|                zips|                                                                                                      
++------------+------------+--------+--------------------+-----------+--------------------+-------+---------+----------+-------+--------
+-----------+--------------------+                                                                                                      
+|    New York|    New York|      NY|            New York|      36061|            New York|40.6943| -73.9249|  18713220|  10715|   Ameri
+ca/New_York|11229 11226 11225...|                                                                                                      
+| Los Angeles| Los Angeles|      CA|          California|       6037|         Los Angeles|34.1139|-118.4068|  12750807|   3276|America/
+Los_Angeles|90291 90293 90292...|                                                                                                      
+|     Chicago|     Chicago|      IL|            Illinois|      17031|                Cook|41.8373| -87.6862|   8604203|   4574|    Amer
+ica/Chicago|60018 60649 60641...|                                                                                                      
+|       Miami|       Miami|      FL|             Florida|      12086|          Miami-Dade|25.7839| -80.2102|   6445545|   5019|   Ameri
+ca/New_York|33129 33125 33126...|                                                                                                      
+|      Dallas|      Dallas|      TX|               Texas|      48113|              Dallas|32.7936| -96.7662|   5743938|   1526|    Amer
+ica/Chicago|75287 75098 75233...|                                                                                                      
+|Philadelphia|Philadelphia|      PA|        Pennsylvania|      42101|        Philadelphia|40.0077| -75.1339|   5649300|   4554|   Ameri
+ca/New_York|19154 19151 19150...|                                                                                                      
+|     Houston|     Houston|      TX|               Texas|      48201|              Harris|29.7863| -95.3889|   5464251|   1399|    Amer
+ica/Chicago|77069 77068 77061...|                                                                                                      
+|     Atlanta|     Atlanta|      GA|             Georgia|      13121|              Fulton|33.7627| -84.4224|   5449398|   1441|   Ameri
+ca/New_York|30334 30331 30332...|                                                                                                      
+|  Washington|  Washington|      DC|District of Columbia|      11001|District of Columbia|38.9047| -77.0163|   5379184|   4457|   Ameri
+ca/New_York|20010 20011 20012...|                                                                                                      
+|      Boston|      Boston|      MA|       Massachusetts|      25025|             Suffolk|42.3188| -71.0846|   4688346|   5532|   Ameri
+ca/New_York|02120 02121 02122...|                                                                                                      
++------------+------------+--------+--------------------+-----------+--------------------+-------+---------+----------+-------+--------
+-----------+--------------------+                                                                                                      
+only showing top 10 rows                                                                                                               
+                                                                                                                                       
+>>>                                                                                                                                    
+>>> cdf.printSchema()                                                                                                                  
+root                                                                                                                                   
+ |-- city: string (nullable = true)                                                                                                    
+ |-- city_ascii: string (nullable = true)                                                                                              
+ |-- state_id: string (nullable = true)                                                                                                
+ |-- state_name: string (nullable = true)                                                                                              
+ |-- county_fips: integer (nullable = true)                                                                                            
+ |-- county_name: string (nullable = true)                                                                                             
+ |-- lat: double (nullable = true)                                                                                                     
+ |-- lng: double (nullable = true)                                                                                                     
+ |-- population: integer (nullable = true)                                                                                             
+ |-- density: integer (nullable = true)                                                                                                
+ |-- timezone: string (nullable = true)                                                                                                
+ |-- zips: string (nullable = true)                                                                                                    
+                                                                                                                                       
+>>>                                                                                                                                    
+>>> cdf.count()                                                                                                                        
+28338
+
+cdf1=cdf.select('city','state_id','state_name','county_name','population','zips')
+cdf1.show(4)
++-----------+--------+----------+-----------+----------+--------------------+
+|       city|state_id|state_name|county_name|population|                zips|                                                          
++-----------+--------+----------+-----------+----------+--------------------+                                                          
+|   New York|      NY|  New York|   New York|  18713220|11229 11226 11225...|                                                          
+|Los Angeles|      CA|California|Los Angeles|  12750807|90291 90293 90292...|                                                          
+|    Chicago|      IL|  Illinois|       Cook|   8604203|60018 60649 60641...|                                                          
+|      Miami|      FL|   Florida| Miami-Dade|   6445545|33129 33125 33126...|                                                          
++-----------+--------+----------+-----------+----------+--------------------+                                                          
+only showing top 4 rows                                                          
+cdf1.printSchema()
+root                                                                                                                                   
+ |-- city: string (nullable = true)                                                                                                    
+ |-- state_id: string (nullable = true)                                                                                                
+ |-- state_name: string (nullable = true)                                                                                              
+ |-- county_name: string (nullable = true)                                                                                             
+ |-- population: integer (nullable = true)                                                                                             
+ |-- zips: string (nullable = true)                                                                                                    
+                                     
+import pyspark.sql.functions as F
+cdf2=cdf1.select(F.upper(cdf1.city).alias("city"),'state_id',F.upper(cdf1.state_name).alias("state_name"),F.upper(cdf1.county_name).alias("county_name"),'population','zips')  
+cdf2.show(3) 
+
++-----------+--------+----------+-----------+----------+--------------------+
+|       city|state_id|state_name|county_name|population|                zips|                                                          
++-----------+--------+----------+-----------+----------+--------------------+                                                          
+|   NEW YORK|      NY|  NEW YORK|   NEW YORK|  18713220|11229 11226 11225...|                                                          
+|LOS ANGELES|      CA|CALIFORNIA|LOS ANGELES|  12750807|90291 90293 90292...|                                                          
+|    CHICAGO|      IL|  ILLINOIS|       COOK|   8604203|60018 60649 60641...|                                                          
++-----------+--------+----------+-----------+----------+--------------------+  
+
+from pyspark.sql.functions import col, lit                                                                                         
+from pyspark.sql.functions import split, explode , size                                                                            
+split_col=split(cdf1['ZIPS'],' ')                                                                                               
+df_split = cdf1.withColumn('Zip_Split_cnt',size(split_col))
+df_split.createOrReplaceTempView("City_split_df")
+
+
+
+
+
+
+[mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -mkdir -p prescpipeline/staging/prescriber                                               
+[mavricbdhoct01231@ip-10-1-1-204 ~]$                                                                                                   
+[mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -put USA_Presc_Medicare_Data_12021.csv prescpipeline/staging/prescriber                  
+[mavricbdhoct01231@ip-10-1-1-204 ~]$                                                                                                   
+[mavricbdhoct01231@ip-10-1-1-204 ~]$ hdfs dfs -cat prescpipeline/staging/prescriber/USA_Presc_Medicare_Data_12021.csv | wc -l          
+1329329          
+
+
+pDF=spark.read.option("header",True).option("inferschema",True).csv("prescpipeline/staging/prescriber/USA_Presc_Medicare_Data_12021.csv") 
+pDF.show(10)
+pDF.printSchema()
+pDF.count()
+1329329
+
+prescriberDF1=pDF.select('npi','nppes_provider_last_org_name','nppes_provider_first_name','nppes_provider_city','nppes_provider_state','specialty_description','drug_name','total_claim_count','total_day_supply','total_drug_cost','years_of_exp')   
+prescriberDF1.printSchema()
+ |-- npi: integer (nullable = true)                                                                                                    
+ |-- nppes_provider_last_org_name: string (nullable = true)                                                                            
+ |-- nppes_provider_first_name: string (nullable = true)                                                                               
+ |-- nppes_provider_city: string (nullable = true)                                                                                     
+ |-- nppes_provider_state: string (nullable = true)                                                                                    
+ |-- specialty_description: string (nullable = true)                                                                                   
+ |-- drug_name: string (nullable = true)                                                                                               
+ |-- total_claim_count: integer (nullable = true)                                                                                      
+ |-- total_day_supply: integer (nullable = true)                                                                                       
+ |-- total_drug_cost: double (nullable = true)                                                                                         
+ |-- years_of_exp: string (nullable = true)
+ 
+prescriberDF1=pDF.select('npi',(pDF.nppes_provider_last_org_name).alias ('np_Lname'),(pDF.nppes_provider_first_name).alias ('np_Fname'),(pDF.nppes_provider_city).alias ('np_city'),(pDF.nppes_provider_state).alias ('np_state'),(pDF.specialty_description).alias ('spcl_desc'),(pDF.drug_name).alias ('drug_nm'),(pDF.total_claim_count).alias ('tot_claim_cnt'),(pDF.total_day_supply).alias ('tot_day_suply'),(pDF.total_drug_cost) .alias ('tot_drug_cst'), (pDF.years_of_exp) .alias ('yrs_of_exp'))    
+prescriberDF1.printSchema()
+root                                                                                                                                   
+ |-- npi: integer (nullable = true)                                                                                                    
+ |-- np_Lname: string (nullable = true)                                                                                                
+ |-- np_Fname: string (nullable = true)                                                                                                
+ |-- np_city: string (nullable = true)                                                                                                 
+ |-- np_state: string (nullable = true)                                                                                                
+ |-- spcl_desc: string (nullable = true)                                                                                               
+ |-- drug_nm: string (nullable = true)                                                                                                 
+ |-- tot_claim_cnt: integer (nullable = true)                                                                                          
+ |-- tot_day_suply: integer (nullable = true)                                                                                          
+ |-- tot_drug_cst: double (nullable = true)                                                                                            
+ |-- yrs_of_exp: string (nullable = true)
+ 
+from pyspark.sql.functions import col, lit
+prescriberDF1=prescriberDF1.withColumn("Country", lit("USA")) 
+prescriberDF1.printSchema()
+prescriberDF1.show(3)
++----------+---------+--------+----------+--------+-----------------+--------------------+-------------+-------------+------------+----
+------+-------+                                                                                                                        
+|       npi| np_Lname|np_Fname|   np_city|np_state|        spcl_desc|             drug_nm|tot_claim_cnt|tot_day_suply|tot_drug_cst|yrs_
+of_exp|Country|                                                                                                                        
++----------+---------+--------+----------+--------+-----------------+--------------------+-------------+-------------+------------+----
+------+-------+                                                                                                                        
+|2006000252|ENKESHAFI| ARDALAN|CUMBERLAND|      MD|Internal Medicine|ATORVASTATIN CALCIUM|           13|          450|      139.32|    
+= 45.0|    USA|                                                                                                                        
+|2006000252|ENKESHAFI| ARDALAN|CUMBERLAND|      MD|Internal Medicine|   CIPROFLOXACIN HCL|           11|           96|       80.99|    
+= 43.0|    USA|                                                                                                                        
+|2006000252|ENKESHAFI| ARDALAN|CUMBERLAND|      MD|Internal Medicine| DOXYCYCLINE HYCLATE|           20|          199|      586.12|    
+= 33.0|    USA|                                                                                                                        
++----------+---------+--------+----------+--------+-----------------+--------------------+-------------+-------------+------------+----
+------+-------+   
+
+import pyspark.sql.functions as f
+prescriberDF1 = prescriberDF1.withColumn("yrs_of_exp", f.regexp_extract("yrs_of_exp", r'([0-9]+)', 1))
+
+from pyspark.sql.types import IntegerType
+prescriberDF2 = prescriberDF1.withColumn("yrs_of_exp", prescriberDF1["yrs_of_exp"].cast(IntegerType()))
+prescriberDF2.printSchema()
+root                                                                                                                                   
+ |-- npi: integer (nullable = true)                                                                                                    
+ |-- np_Lname: string (nullable = true)                                                                                                
+ |-- np_Fname: string (nullable = true)                                                                                                
+ |-- np_city: string (nullable = true)                                                                                                 
+ |-- np_state: string (nullable = true)                                                                                                
+ |-- spcl_desc: string (nullable = true)                                                                                               
+ |-- drug_nm: string (nullable = true)                                                                                                 
+ |-- tot_claim_cnt: integer (nullable = true)                                                                                          
+ |-- tot_day_suply: integer (nullable = true)                                                                                          
+ |-- tot_drug_cst: double (nullable = true)                                                                                            
+ |-- yrs_of_exp: integer (nullable = true)                                                                                             
+ |-- Country: string (nullable = false) 
+ 
+from pyspark.sql.functions import concat, concat_ws,col, lit                                                                           
+prescriberDF2 = prescriberDF2.withColumn("presc_fullname",concat_ws(" ", "np_Fname", "np_Lname"))       
+prescriberDF2.show(5)
+
++----------+---------+--------+----------+--------+-----------------+--------------------+-------------+-------------+------------+----
+------+-------+-----------------+                                                                                                      
+|       npi| np_Lname|np_Fname|   np_city|np_state|        spcl_desc|             drug_nm|tot_claim_cnt|tot_day_suply|tot_drug_cst|yrs_
+of_exp|Country|   presc_fullname|                                                                                                      
++----------+---------+--------+----------+--------+-----------------+--------------------+-------------+-------------+------------+----
+------+-------+-----------------+                                                                                                      
+|2006000252|ENKESHAFI| ARDALAN|CUMBERLAND|      MD|Internal Medicine|ATORVASTATIN CALCIUM|           13|          450|      139.32|    
+    45|    USA|ARDALAN ENKESHAFI|                                                                                                      
+|2006000252|ENKESHAFI| ARDALAN|CUMBERLAND|      MD|Internal Medicine|   CIPROFLOXACIN HCL|           11|           96|       80.99|    
+    43|    USA|ARDALAN ENKESHAFI|                                                                                                      
+|2006000252|ENKESHAFI| ARDALAN|CUMBERLAND|      MD|Internal Medicine| DOXYCYCLINE HYCLATE|           20|          199|      586.12|    
+    33|    USA|ARDALAN ENKESHAFI|                                                                                                      
+|2006000252|ENKESHAFI| ARDALAN|CUMBERLAND|      MD|Internal Medicine|             ELIQUIS|           17|          510|     6065.02|    
+    44|    USA|ARDALAN ENKESHAFI|                                                                                                      
+|2006000252|ENKESHAFI| ARDALAN|CUMBERLAND|      MD|Internal Medicine|          FUROSEMIDE|           17|          405|       45.76|    
+    55|    USA|ARDALAN ENKESHAFI|                                                                                                      
++----------+---------+--------+----------+--------+-----------------+--------------------+-------------+-------------+------------+----
+------+-------+-----------------+  
+
+prescriberDF2 = prescriberDF2.drop("np_Fname", "np_Lname")                                                                             
+prescriberDF2.show(3)
+
++----------+----------+--------+-----------------+--------------------+-------------+-------------+------------+----------+-------+----
+-------------+                                                                                                                         
+|       npi|   np_city|np_state|        spcl_desc|             drug_nm|tot_claim_cnt|tot_day_suply|tot_drug_cst|yrs_of_exp|Country|   p
+resc_fullname|                                                                                                                         
++----------+----------+--------+-----------------+--------------------+-------------+-------------+------------+----------+-------+----
+-------------+                                                                                                                         
+|2006000252|CUMBERLAND|      MD|Internal Medicine|ATORVASTATIN CALCIUM|           13|          450|      139.32|        45|    USA|ARDA
+LAN ENKESHAFI|                                                                                                                         
+|2006000252|CUMBERLAND|      MD|Internal Medicine|   CIPROFLOXACIN HCL|           11|           96|       80.99|        43|    USA|ARDA
+LAN ENKESHAFI|                                                                                                                         
+|2006000252|CUMBERLAND|      MD|Internal Medicine| DOXYCYCLINE HYCLATE|           20|          199|      586.12|        33|    USA|ARDA
+LAN ENKESHAFI|                                                                                                                         
++----------+----------+--------+-----------------+--------------------+-------------+-------------+------------+----------+-------+----
+-------------+
+
+from pyspark.sql.functions import col,isnan, when, count  
+prescriberDF2.select([count(when(isnan(c) | col(c).isNull(),c)).alias(c) for c in prescriberDF2.columns]).show()       
+
++---+-------+--------+---------+-------+-------------+-------------+------------+----------+-------+--------------+
+|npi|np_city|np_state|spcl_desc|drug_nm|tot_claim_cnt|tot_day_suply|tot_drug_cst|yrs_of_exp|Country|presc_fullname|                    
++---+-------+--------+---------+-------+-------------+-------------+------------+----------+-------+--------------+                    
+| 22|      1|       1|        1|     15|            3|            1|           1|         1|      0|             0|                    
++---+-------+--------+---------+-------+-------------+-------------+------------+----------+-------+--------------+    
+
+prescriberDF2 = prescriberDF2.na.drop(subset=["npi"])                                                                              
+prescriberDF2 = prescriberDF2.na.drop(subset=["drug_nm"])                                                                          
+prescriberDF2.printSchema() 
+ |-- npi: integer (nullable = true)                                                                                                    
+ |-- np_city: string (nullable = true)                                                                                                 
+ |-- np_state: string (nullable = true)                                                                                                
+ |-- spcl_desc: string (nullable = true)                                                                                               
+ |-- drug_nm: string (nullable = true)                                                                                                 
+ |-- tot_claim_cnt: integer (nullable = true)                                                                                          
+ |-- tot_day_suply: integer (nullable = true)                                                                                          
+ |-- tot_drug_cst: double (nullable = true)                                                                                            
+ |-- yrs_of_exp: integer (nullable = true)                                                                                             
+ |-- Country: string (nullable = false)                                                                                                
+ |-- presc_fullname: string (nullable = false)  
+ 
+prescriberDF2.select([count(f.when(isnan(c) | col(c).isNull(),c)).alias(c) for c in prescriberDF2.columns]).show()
+
++---+-------+--------+---------+-------+-------------+-------------+------------+----------+-------+--------------+
+|npi|np_city|np_state|spcl_desc|drug_nm|tot_claim_cnt|tot_day_suply|tot_drug_cst|yrs_of_exp|Country|presc_fullname|                    
++---+-------+--------+---------+-------+-------------+-------------+------------+----------+-------+--------------+                    
+|  0|      0|       0|        0|      0|            2|            0|           0|         0|      0|             0|                    
++---+-------+--------+---------+-------+-------------+-------------+------------+----------+-------+--------------+   
+
+Delete the records where the PRESC_ID and DRUG_NAME is fields are NULL. Use dropna() of dataframe
+
+prescriberDF2 = prescriberDF2.na.drop(subset=["npi"])                                                                              
+prescriberDF2 = prescriberDF2.na.drop(subset=["drug_nm"])                                                                          
+prescriberDF2.printSchema() 
+prescriberDF2.select([count(f.when(isnan(c) | col(c).isNull(),c)).alias(c) for c in prescriberDF2.columns]).show()
+
++---+-------+--------+---------+-------+-------------+-------------+------------+----------+-------+--------------+
+|npi|np_city|np_state|spcl_desc|drug_nm|tot_claim_cnt|tot_day_suply|tot_drug_cst|yrs_of_exp|Country|presc_fullname|                    
++---+-------+--------+---------+-------+-------------+-------------+------------+----------+-------+--------------+                    
+|  0|      0|       0|        0|      0|            2|            0|           0|         0|      0|             0|                    
++---+-------+--------+---------+-------+-------------+-------------+------------+----------+-------+--------------+  
+
+
+from pyspark.sql import functions as F
+prescriberDF2 = prescriberDF2.filter(F.col("yrs_of_exp").between(20,50))
+prescriberDF2.createOrReplaceTempView("prescriber")
+spark.sql("SELECT min(yrs_of_exp) , max(yrs_of_exp) from prescriber").show()
+
++-----------------+-----------------+
+|min(yrs_of_exp)|max(yrs_of_exp)|                                                                                                  
++-----------------+-----------------+                                                                                                  
+|               30|               50|                                                                                                  
++-----------------+-----------------+   
+ 
+from pyspark.sql import Window
+from pyspark.sql.functions import dense_rank
+from pyspark.sql.functions import concat, concat_ws,col, lit
+window = Window.partitionBy("np_state").orderBy(col("tot_claim_cnt").desc()) 
+prescriberDF2 = prescriberDF2.withColumn("tot_claim_cnt_rank", dense_rank().over(window))
+prescriberDF2.createOrReplaceTempView("prescriber")
+
+
+spark.sql("SELECT npi as Prescriber_ID  , presc_fullname as Prescriber_Full_Name, np_state as Prescriber_State,Country as Prescriber_Country, yrs_of_exp as Prescriber_Years_of_Experience,tot_claim_cnt as Total_claim_count,tot_day_suply as Total_Days_Supply,tot_drug_cst as Total_Drug_Cost from prescriber where tot_claim_cnt_rank <= 5").show()
++-------------+--------------------+----------------+------------------+------------------------------+-----------------+--------------
+---+---------------+                                                                                                                   
+|Prescriber_ID|Prescriber_Full_Name|Prescriber_State|Prescriber_Country|Prescriber_Years_of_Experience|Total_claim_count|Total_Days_Sup
+ply|Total_Drug_Cost|                                                                                                                   
++-------------+--------------------+----------------+------------------+------------------------------+-----------------+--------------
+---+---------------+                                                                                                                   
+|  -2066947266|        JASON LEVINE|              AZ|               USA|                            44|             2323|            88
+055|       32106.45|                                                                                                                   
+|  -1794241117|      MARLYCE PARKER|              AZ|               USA|                            30|             1432|            42
+355|       97555.45|                                                                                                                   
+|  -1965943331| EDITA EXTRA-MENDOZA|              AZ|               USA|                            44|             1396|           109
+516|       36104.99|                                                                                                                   
+|  -2026427310|         STEVE FANTO|              AZ|               USA|                            43|             1170|            30
+653|        78008.1|                                                                                                                   
+|  -2016466268|        GERALD MUTHU|              AZ|               USA|                            48|             1160|            77
+367|       23637.02|                                                                                                                   
+|  -1440630986|         BIREN PATEL|              AZ|               USA|                            33|             1160|            89
+228|       25469.91|                                                                                                                   
+|  -1551747248|         PETER MAUNG|              SC|               USA|                            33|             1979|            52
+088|       23043.05|                                                                                                                   
+|  -2046749848|     REBECCA HOLDREN|              SC|               USA|                            32|             1839|            53
+807|       56684.97|                                                                                                                   
+|  -2137545255|    JUSTIN HUTCHESON|              SC|               USA|                            38|             1499|            43
+828|        49576.3|                                                                                                                   
+|  -1773927957|      THEODORE MEYER|              SC|               USA|                            37|             1477|            17
+869|        5281.43|                                                                                                                   
+|   2046275408|   DANETTE MCALHANEY|              SC|               USA|                            44|             1449|            40
+076|       13061.85|                                                                                                                   
+|  -1733506909|    FRED DEFRANCESCH|              LA|               USA|                            32|             3437|           101
+097|       221476.8|                                                                                                                   
+|  -1713417548|         STEVEN HOLT|              LA|               USA|                            32|             2190|             2
+190|      474677.47|                                                                                                                   
+|  -2107330086|      FADI ABOU-ISSA|              LA|               USA|                            38|             1964|            56
+535|       42282.81|                                                                                                                   
+|  -1925530724|        JOHN COOKSEY|              LA|               USA|                            31|             1772|            54
+131|       19440.73|                                                                                                                   
+|  -1591149035| CHRISTOPHER GRENIER|              LA|               USA|                            42|             1701|            66
+073|       25784.08|                                                                                                                   
+|  -1814408405|          DAVID PARK|              MN|               USA|                            44|             1151|            39
+438|       15536.84|                                                                                                                   
+|  -1602226349|      MICHAEL MESSER|              MN|               USA|                            43|             1129|            34
+661|       11571.68|                                                                                                                   
+|  -1854860928|          CORY BOYCE|              MN|               USA|                            36|              983|            64
+739|       17219.76|                                                                                                                   
+|  -1662962601|        SANJAY PATEL|              MN|               USA|                            45|              976|            46
+144|         7078.2|                                                                                                                   
++-------------+--------------------+----------------+------------------+------------------------------+-----------------+--------------
+---+---------------+
+
+prescriber1_df = spark.sql("SELECT count(distinct npi) as  Prescriber_Counts,np_city from prescriber group by np_city").show()                                                                                      
+
++-----------------+----------------+
+|Prescriber_Counts|         np_city|                                                                                                   
++-----------------+----------------+                                                                                                   
+|              151|      CUMBERLAND|                                                                                                   
+|              268|       PRINCETON|                                                                                                   
+|              124|         MARLTON|                                                                                                   
+|               87|     MCMINNVILLE|                                                                                                   
+|              202|       WATERTOWN|                                                                                                   
+|               32|       SAN PABLO|                                                                                                   
+|               12|        EMINENCE|                                                                                                   
+|               17|          BAXLEY|                                                                                                   
+|               14|        OLD TOWN|                                                                                                   
+|               50|          NOVATO|                                                                                                   
+|               11|       ELLINGTON|                                                                                                   
+|               46|       SOUTHLAKE|                                                                                                   
+|               95|         EDMONDS|                                                                                                   
+|               24|            BOAZ|                                                                                                   
+|               12|     WALLED LAKE|                                                                                                   
+|               28|OAKBROOK TERRACE|                                                                                                   
+|               19|      DALLASTOWN|                                                                                                   
+|               19|         HANCOCK|                                                                                                   
+|               11|         LINDALE|                                                                                                   
+|                9|        OGALLALA|                                                                                                   
++-----------------+----------------+                                                                                                   
+only showing top 20 rows              
+
+prescriber1_df = spark.sql("SELECT count(distinct npi) as  Prescriber_Counts ,sum(tot_claim_cnt) as total_claim_counts,np_city, np_state from prescriber group by np_city,np_state")                                                                                      
+
+prescriber1_df.createOrReplaceTempView("prescriber1")                                                                              
+
+df_split.createOrReplaceTempView("City_split_df")
+
+spark.sql( "SELECT CITY as City_Name,STATE_NAME as State_Name,COUNTY_NAME as County_Name ,POPULATION as City_Population,Zip_Split_cnt as Number_of_Zips,p.Prescriber_Counts,p.total_claim_counts FROM City_split_df c inner join prescriber1 p on upper(c.CITY) = p.np_city and c.STATE_ID = p.np_state").show() 
+
++-------------+----------+---------------+---------------+--------------+-----------------+------------------+
+|    City_Name|State_Name|    County_Name|City_Population|Number_of_Zips|Prescriber_Counts|total_claim_counts|                         
++-------------+----------+---------------+---------------+--------------+-----------------+------------------+                         
+| Chesterfield|  Missouri|      St. Louis|          47538|             3|              190|             35410|                         
+|Lawrenceville|New Jersey|         Mercer|           3949|             1|               77|              8633|                         
+|Staten Island|  New York|       Richmond|         476143|            12|              525|             79364|                         
+|   Cookeville| Tennessee|         Putnam|          50408|             5|              166|             27187|                         
+|   Janesville| Wisconsin|           Rock|          70755|             4|              121|             14054|                         
+|    Fairfield|California|         Solano|         148683|             4|              118|             14280|                         
+| Port Clinton|      Ohio|         Ottawa|          13614|             1|               17|              2476|                         
+|       Eureka|California|       Humboldt|          44236|             5|               71|              9491|                         
+|        Salem|   Indiana|     Washington|           6422|             1|               11|              2591|                         
+|      Sartell| Minnesota|        Stearns|          18926|             1|               32|              5027|                         
+|       Fruita|  Colorado|           Mesa|          13478|             1|               21|              3896|                         
+|   Statesboro|   Georgia|        Bulloch|          42102|             4|               67|             16935|                         
+|        Bowie|  Maryland|Prince George's|          58643|             7|               50|              4214|                         
+|      Syosset|  New York|         Nassau|          19453|             2|               52|              6089|                         
+|   Hayneville|   Alabama|        Lowndes|            784|             1|                2|               585|                         
+|      Medford|  New York|        Suffolk|          24406|             1|               20|              3053|                         
+|  King George|  Virginia|    King George|           4902|             1|                4|               307|                         
+|  Sun Prairie| Wisconsin|           Dane|          34661|             1|               29|              5445|                         
+|   Guttenberg|New Jersey|         Hudson|          11121|             1|                5|               639|                         
+|        Globe|   Arizona|           Gila|          13182|             3|               16|              1644|                         
++-------------+----------+---------------+---------------+--------------+-----------------+------------------+                         
+only showing top 20 rows  
+
+spark.sql( "SELECT CITY as City_Name,STATE_NAME as State_Name,COUNTY_NAME as County_Name ,POPULATION as City_Population,Zip_Split_cnt as Number_of_Zips,p.Prescriber_Counts,p.total_claim_counts FROM City_split_df c inner join prescriber1 p on upper(c.CITY) = p.np_city and c.STATE_ID = p.np_state where p.Prescriber_Counts != 0").show() 
+
++-------------+-------------+---------------+---------------+--------------+-----------------+------------------+
+|    City_Name|   State_Name|    County_Name|City_Population|Number_of_Zips|Prescriber_Counts|total_claim_counts|                      
++-------------+-------------+---------------+---------------+--------------+-----------------+------------------+                      
+|Staten Island|     New York|       Richmond|         476143|            12|              525|             79364|                      
+|   Statesboro|      Georgia|        Bulloch|          42102|             4|               67|             16935|                      
+|    Fairfield|   California|         Solano|         148683|             4|              118|             14280|                      
+|        Bowie|     Maryland|Prince George's|          58643|             7|               50|              4214|                      
+|  Guerneville|   California|         Sonoma|           5014|             2|                8|              1075|                      
+|Lawrenceville|   New Jersey|         Mercer|           3949|             1|               77|              8633|                      
+|   Cookeville|    Tennessee|         Putnam|          50408|             5|              166|             27187|                      
+|      Medford|     New York|        Suffolk|          24406|             1|               20|              3053|                      
+| Chesterfield|     Missouri|      St. Louis|          47538|             3|              190|             35410|                      
+|        Salem|      Indiana|     Washington|           6422|             1|               11|              2591|                      
+|  Sun Prairie|    Wisconsin|           Dane|          34661|             1|               29|              5445|                      
+|      Sartell|    Minnesota|        Stearns|          18926|             1|               32|              5027|                      
+|   Janesville|    Wisconsin|           Rock|          70755|             4|              121|             14054|                      
+| Port Clinton|         Ohio|         Ottawa|          13614|             1|               17|              2476|                      
+|        Wayne|     Illinois|         DuPage|           2429|             1|                1|                23|                      
+|    Sandstone|    Minnesota|           Pine|           2639|             1|                7|              1002|                      
+|       Romney|West Virginia|      Hampshire|           1695|             1|               11|              3577|                      
+|      Stanton|   California|         Orange|          38139|             1|                5|               216|                      
+|       Eureka|   California|       Humboldt|          44236|             5|               71|              9491|                      
+|      Huntley|     Illinois|        McHenry|          27228|             1|               21|              2316|                      
++-------------+-------------+---------------+---------------+--------------+-----------------+------------------+
+
+
+hdfs dfs -mkdir -p prescpipeline/output/city 
+
+hdfs dfs -mkdir -p prescpipeline/output/prescriber
+
+from pyspark.sql import SparkSession                                                                                               
+
+spark=SparkSession.builder.appName("SparkHive").enableHiveSupport().config("spark.sql.warehouse.dir","/user/hive/warehouse").getOrCreate()                                                                                                                            
+spark.sparkContext.setLogLevel("ERROR")  
+
+City_report_df = spark.sql( "SELECT CITY as City_Name,STATE_NAME as State_Name,COUNTY_NAME as County_Name ,POPULATION as City_Population,Zip_Split_cnt as Number_of_Zips,p.Prescriber_Counts,p.total_claim_counts FROM City_split_df c inner join prescriber1 p on upper(c.CITY) = p.np_city and c.STATE_ID = p.np_state where p.Prescriber_Counts != 0")
+
+City_report_df.write.mode("overwrite").option("compression","bzip2").json("/user/mavricbdhoct01231/prescpipeline/output/city") 
+
+ 
+prescriber_report_DF = spark.sql("SELECT npi as Prescriber_ID  , presc_fullname as Prescriber_Full_Name, np_state as Prescriber_State,Country as Prescriber_Country, yrs_of_exp as Prescriber_Years_of_Experience,tot_claim_cnt as Total_claim_count,tot_day_suply as Total_Days_Supply,tot_drug_cst as Total_Drug_Cost from prescriber where tot_claim_cnt_rank <= 5")
+
+prescriber_report_DF.write.mode("overwrite").option("compression","snappy").orc("/user/mavricbdhoct01231/prescpipeline/output/prescriber")
+
+prescriber_report_DF.write.partitionBy("Total_claim_count").mode("overwrite").saveAsTable("djhive.prescriber_final_report")
+
+City_report_df.write.mode("overwrite").saveAsTable("djhive.city_final_report")
+
+hdfs dfs -ls /user/mavricbdhoct01231/prescpipeline/output/city 
+
+hdfs dfs -ls /user/mavricbdhoct01231/prescpipeline/output/prescriber   
+
+
+use djhive;
+show tables;
+desc city_final_report; 
+city_name               string                                                                                                         
+state_name              string                                                                                                         
+county_name             string                                                                                                         
+city_population         int                                                                                                            
+number_of_zips          int                                                                                                            
+prescriber_counts       bigint                                                                                                         
+total_claim_counts      bigint 
+
+desc prescriber_final_report ;
+prescriber_id           int                                                                                                            
+prescriber_full_name    string                                                                                                         
+prescriber_state        string                                                                                                         
+prescriber_country      string                                                                                                         
+prescriber_years_of_experience  int                                                                                                    
+total_days_supply       int                                                                                                            
+total_drug_cost         double                                                                                                         
+total_claim_count       int                                                                                                            
+# Partition Information                                                                                                                
+# col_name              data_type               comment 
+
+select * from city_final_report limit 10;
+Medford New York        Suffolk 24406   1       20      3053                                                                           
+Cookeville      Tennessee       Putnam  50408   5       166     27187                                                                  
+Bowie   Maryland        Prince George's 58643   7       50      4214                                                                   
+Staten Island   New York        Richmond        476143  12      525     79364                                                          
+Fruita  Colorado        Mesa    13478   1       21      3896                                                                           
+Janesville      Wisconsin       Rock    70755   4       121     14054                                                                  
+Sartell Minnesota       Stearns 18926   1       32      5027                                                                           
+Syosset New York        Nassau  19453   2       52      6089                                                                           
+Chesterfield    Missouri        St. Louis       47538   3       190     35410                                                          
+Fairfield       California      Solano  148683  4       118     14280   
+
+select * from prescriber_final_report order by Total_claim_count desc limit 5;                  
+2046271524      VICOTR MARIANO MERCEDES PR      USA     31      226626  36144.11        7547                                           
+-1511202747     NELSA RODRIGUEZ CESPEDES        PR      USA     32      180999  24240.24        5946                                   
+-1672014650     ERIC BARNES     MO      USA     38      101782  69090.34        5633                                                   
+-1642601641     RUSHDI ALUL     IL      USA     34      24688   315358.1        5439                                                   
+2127047843      JOHN RICHARD    KY      USA     48      124650  48678.15        5269                                                   
